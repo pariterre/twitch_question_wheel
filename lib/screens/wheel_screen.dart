@@ -1,14 +1,18 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_fortune_wheel/flutter_fortune_wheel.dart';
 
 class WheelScreen extends StatefulWidget {
-  const WheelScreen({super.key, required this.questions});
+  const WheelScreen({super.key, required this.questionsPath});
 
-  final Map<String, List<String>> questions;
+  static const route = "/wheel-screen";
+
+  final String questionsPath;
 
   @override
   State<WheelScreen> createState() => _WheelScreenState();
@@ -18,17 +22,22 @@ class _WheelScreenState extends State<WheelScreen> {
   StreamController<int> selected = StreamController<int>();
   final _spinDuration = const Duration(seconds: 3);
   DateTime _spinStartingTime = DateTime.now();
-  String? _question;
+
+  late Future<Map<String, List<String>>> _questions;
+  String? _currentQuestion;
   final _questionDuration = const Duration(seconds: 10);
 
   @override
   void initState() {
     super.initState();
+    _questions = _loadQuestions();
+  }
 
-    // Initialize with a random value
-    selected.add(
-      Fortune.randomInt(0, widget.questions.length),
-    );
+  Future<Map<String, List<String>>> _loadQuestions() async {
+    final data = jsonDecode(await rootBundle.loadString(widget.questionsPath));
+    return data.map<String, List<String>>((String key, value) {
+      return MapEntry(key, (value as List).map<String>((e) => e).toList());
+    });
   }
 
   @override
@@ -46,7 +55,7 @@ class _WheelScreenState extends State<WheelScreen> {
     );
   }
 
-  void _spinWheel() {
+  void _spinWheel(Map<String, List<String>> questions) {
     if (DateTime.now().subtract(_spinDuration).compareTo(_spinStartingTime) <
         0) {
       // Not enough time from the last spin then don't rotate
@@ -54,28 +63,34 @@ class _WheelScreenState extends State<WheelScreen> {
     }
 
     _spinStartingTime = DateTime.now();
-    final nextCategoryIndex = Fortune.randomInt(0, widget.questions.length);
-    final nextCategory = widget.questions.keys.toList()[nextCategoryIndex];
+    final nextCategoryIndex = Fortune.randomInt(0, questions.length);
+    final nextCategory = questions.keys.toList()[nextCategoryIndex];
+    final categoryQuestions = questions[nextCategory]!;
+    final nextQuestion =
+        categoryQuestions[Fortune.randomInt(0, categoryQuestions.length)];
+
     selected.add(nextCategoryIndex);
-    Future.delayed(_spinDuration, () => _bringQuestion(nextCategory));
+    Future.delayed(_spinDuration, () => _askQuestion(nextQuestion));
     setState(() {});
   }
 
-  void _bringQuestion(String nextCategory) {
-    final questions = widget.questions[nextCategory]!;
-    _question = questions[Fortune.randomInt(0, questions.length)];
+  void _askQuestion(String nextQuestion) {
+    _currentQuestion = nextQuestion;
     Future.delayed(_questionDuration, _removeQuestion);
     setState(() {});
   }
 
   void _removeQuestion() {
-    _question = null;
+    _currentQuestion = null;
     setState(() {});
   }
 
-  Widget _buildWheel(Color backgroundColor, double wheelSize) =>
+  Widget _buildWheel(Map<String, List<String>> questions, Color backgroundColor,
+          double wheelSize) =>
       GestureDetector(
-        onTap: _question == null ? _spinWheel : _removeQuestion,
+        onTap: _currentQuestion == null
+            ? () => _spinWheel(questions)
+            : _removeQuestion,
         child: RotatedBox(
           quarterTurns: 1,
           child: Container(
@@ -95,7 +110,7 @@ class _WheelScreenState extends State<WheelScreen> {
                   duration: _spinDuration,
                   selected: selected.stream,
                   rotationCount: _spinDuration.inSeconds * 2,
-                  items: widget.questions.keys
+                  items: questions.keys
                       .toList()
                       .asMap()
                       .entries
@@ -120,35 +135,48 @@ class _WheelScreenState extends State<WheelScreen> {
     final windowSize = MediaQuery.of(context).size;
     final wheelSize = min(windowSize.height, windowSize.width) * 0.95;
 
-    final wheel = _buildWheel(backgroundColor, wheelSize);
     return Scaffold(
-      body: Stack(
-        alignment: Alignment.center,
-        children: [
-          wheel,
-          if (_question != null)
-            Positioned(
-              bottom: wheelSize / 2,
-              child: Container(
-                decoration: BoxDecoration(color: Colors.blue.withAlpha(250)),
-                width: wheelSize * 6 / 5,
-                height: wheelSize / 5,
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: AutoSizeText(
-                      _question!,
-                      maxLines: 2,
-                      style: TextStyle(
-                          color: Colors.white, fontSize: wheelSize / 20),
-                      textAlign: TextAlign.center,
+      body: FutureBuilder(
+          future: _questions,
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+
+            final questions = snapshot.data!;
+            final wheel = _buildWheel(questions, backgroundColor, wheelSize);
+
+            return Stack(
+              alignment: Alignment.center,
+              children: [
+                wheel,
+                if (_currentQuestion != null)
+                  Positioned(
+                    bottom: wheelSize / 2,
+                    child: Container(
+                      decoration:
+                          BoxDecoration(color: Colors.blue.withAlpha(250)),
+                      width: wheelSize * 6 / 5,
+                      height: wheelSize / 5,
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: AutoSizeText(
+                            _currentQuestion!,
+                            maxLines: 2,
+                            style: TextStyle(
+                                color: Colors.white, fontSize: wheelSize / 20),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-            ),
-        ],
-      ),
+              ],
+            );
+          }),
     );
   }
 }

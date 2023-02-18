@@ -1,31 +1,26 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
-import 'screens/wheel_screen.dart';
+import '/screens/connect_screen.dart';
+import '/screens/wheel_screen.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  final data = jsonDecode(await rootBundle.loadString("assets/questions.json"));
-  final questions = data.map<String, List<String>>((String key, value) {
-    return MapEntry(key, (value as List).map<String>((e) => e).toList());
-  });
-
-  runApp(MyApp(questions: questions));
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key, required this.questions});
+  const MyApp({super.key});
 
-  final Map<String, List<String>> questions;
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: WheelScreen(
-        questions: questions,
-      ),
+      initialRoute: ConnectScreen.route,
+      routes: {
+        ConnectScreen.route: (ctx) => const ConnectScreen(
+            credentialsPath: 'assets/credentials.json',
+            nextRoute: WheelScreen.route),
+        WheelScreen.route: (ctx) =>
+            const WheelScreen(questionsPath: 'assets/questions.json'),
+      },
     );
   }
 }
