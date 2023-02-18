@@ -1,26 +1,27 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'screens/wheel_screen.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final data = jsonDecode(await rootBundle.loadString("assets/questions.json"));
+  final questions = data.map<String, List<String>>((String key, value) {
+    return MapEntry(key, (value as List).map<String>((e) => e).toList());
+  });
+
+  runApp(MyApp(questions: questions));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({super.key, required this.questions});
 
+  final Map<String, List<String>> questions;
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    final questions = {
-      'Vie professionnelle': ['Q1', 'Q2'],
-      'Vie personnelle': ['Q3', 'Q4'],
-      'Méthode pomodoro': ['Q5'],
-      'Anecdote': ['Q6', 'Q7', 'Q8'],
-      'Bonne bouffe': ['Q9'],
-      'Voyage': ['Q10', 'Q11'],
-    };
-
     return MaterialApp(
       home: WheelScreen(
         questions: questions,

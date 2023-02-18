@@ -1,0 +1,8 @@
+{
+    "Vie professionnelle":["Q1", "Q2"],
+    "Vie personnelle": ["Q3", "Q4"],
+    "Méthode pomodoro": ["Q5"],
+    "Anecdote": ["Q6", "Q7", "Q8"],
+    "Bonne bouffe": ["Q9"],
+    "Voyage": ["Q10", "Q11"]
+}
