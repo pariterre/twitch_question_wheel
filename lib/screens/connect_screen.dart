@@ -1,8 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:irc/client.dart';
 
 class ConnectScreen extends StatefulWidget {
   const ConnectScreen(
@@ -24,6 +24,9 @@ class _ConnectScreenState extends State<ConnectScreen> {
   late final String ircServerAddress;
   late final int ircPort;
 
+  late Socket client;
+  late final Future<bool> _isReady = _readCredentials();
+
   Future<bool> _readCredentials() async {
     final data =
         jsonDecode(await rootBundle.loadString(widget.credentialsPath));
@@ -35,29 +38,48 @@ class _ConnectScreenState extends State<ConnectScreen> {
     return true;
   }
 
-  void _connect(BuildContext context) {
-    // self._irc_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    // self._irc_socket.connect((self._config.irc_server_address, self._config.irc_port))
-    // self._connexion_initialized = True
-    // self._irc_send_data(f"PASS {self._config.oauth_key}")
-    // self._irc_send_data(f"NICK {self._config.nickname}")
-    // self._irc_send_data(f"JOIN #{self._config.channel_name}")
+  @override
+  void dispose() {
+    super.dispose();
+    _disconnect();
+  }
 
-    final client = Client(Configuration(
-      nickname: nickname,
-      host: ircServerAddress,
-      port: ircPort,
-    ));
-    client.connect();
+  void _connect(BuildContext context) async {
+    client = await Socket.connect(ircServerAddress, ircPort);
+    debugPrint(
+        'Connected to: ${client.remoteAddress.address}:${client.remotePort}');
+    client.listen((Uint8List data) {
+      final serverResponse = String.fromCharCodes(data);
+      debugPrint('Server: $serverResponse');
+    });
 
-    Navigator.of(context).pushReplacementNamed(widget.nextRoute);
+    debugPrint('Joining server...');
+    client.write('PASS $oauthKey\n');
+    client.write('NICK $nickname\n');
+    client.write('JOIN #$channelName\n');
+
+    debugPrint('Connexion established');
+    //Navigator.of(context).pushReplacementNamed(widget.nextRoute);
+  }
+
+  void _send(String message) {
+    final messageToSend = 'PRIVMSG #$channelName :$message\n';
+    debugPrint('Sending message:\n$messageToSend');
+    client.write(messageToSend);
+  }
+
+  void _disconnect() async {
+    final message = 'PART $channelName';
+    debugPrint('Sending message:\n$message');
+    client.write(message);
+    client.close();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: FutureBuilder(
-          future: _readCredentials(),
+          future: _isReady,
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
               return const Center(
@@ -77,6 +99,12 @@ class _ConnectScreenState extends State<ConnectScreen> {
                   ElevatedButton(
                       onPressed: (() => _connect(context)),
                       child: const Text('Connecter')),
+                  ElevatedButton(
+                      onPressed: (() => _send("Coucou!")),
+                      child: const Text('Send')),
+                  ElevatedButton(
+                      onPressed: (() => _disconnect()),
+                      child: const Text('Quit')),
                 ],
               ),
             );
