@@ -1,26 +1,27 @@
 import 'package:flutter/material.dart';
 
-import '/screens/connect_screen.dart';
+import '/models/twitch_connector.dart';
 import '/screens/wheel_screen.dart';
 
 void main() async {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  final connector =
+      await TwitchConnector.fromJsonConfig('assets/credentials.json');
+  runApp(MyApp(connector: connector));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({super.key, required this.connector});
+
+  final TwitchConnector connector;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute: ConnectScreen.route,
-      routes: {
-        ConnectScreen.route: (ctx) => const ConnectScreen(
-            credentialsPath: 'assets/credentials.json',
-            nextRoute: WheelScreen.route),
-        WheelScreen.route: (ctx) =>
-            const WheelScreen(questionsPath: 'assets/questions.json'),
-      },
+      home: WheelScreen(
+        questionsPath: 'assets/questions.json',
+        connector: connector,
+      ),
     );
   }
 }

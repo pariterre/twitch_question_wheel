@@ -7,12 +7,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_fortune_wheel/flutter_fortune_wheel.dart';
 
+import '/models/twitch_connector.dart';
+
 class WheelScreen extends StatefulWidget {
-  const WheelScreen({super.key, required this.questionsPath});
+  const WheelScreen(
+      {super.key, required this.questionsPath, required this.connector});
 
   static const route = "/wheel-screen";
 
   final String questionsPath;
+  final TwitchConnector connector;
 
   @override
   State<WheelScreen> createState() => _WheelScreenState();
@@ -46,6 +50,14 @@ class _WheelScreenState extends State<WheelScreen> {
     super.dispose();
   }
 
+  void _spinIfTwichAsks(
+      String sender, String message, Map<String, List<String>> questions) {
+    if (message != '!spin') return;
+    if (!_spinWheel(questions)) return;
+
+    widget.connector.send('Et ça toooourneee!!!');
+  }
+
   Color _getFillColor(Color color, int index) {
     final opacity = index % 2 == 0 ? 0.6 : 0.3;
 
@@ -55,11 +67,11 @@ class _WheelScreenState extends State<WheelScreen> {
     );
   }
 
-  void _spinWheel(Map<String, List<String>> questions) {
+  bool _spinWheel(Map<String, List<String>> questions) {
     if (DateTime.now().subtract(_spinDuration).compareTo(_spinStartingTime) <
         0) {
       // Not enough time from the last spin then don't rotate
-      return;
+      return false;
     }
 
     _spinStartingTime = DateTime.now();
@@ -72,6 +84,7 @@ class _WheelScreenState extends State<WheelScreen> {
     selected.add(nextCategoryIndex);
     Future.delayed(_spinDuration, () => _askQuestion(nextQuestion));
     setState(() {});
+    return true;
   }
 
   void _askQuestion(String nextQuestion) {
@@ -86,48 +99,49 @@ class _WheelScreenState extends State<WheelScreen> {
   }
 
   Widget _buildWheel(Map<String, List<String>> questions, Color backgroundColor,
-          double wheelSize) =>
-      GestureDetector(
-        onTap: _currentQuestion == null
-            ? () => _spinWheel(questions)
-            : _removeQuestion,
-        child: RotatedBox(
-          quarterTurns: 1,
-          child: Container(
-            decoration: BoxDecoration(color: backgroundColor),
-            child: Center(
-              child: SizedBox(
-                height: wheelSize,
-                width: wheelSize,
-                child: FortuneWheel(
-                  indicators: const [
-                    FortuneIndicator(
-                        alignment: Alignment.topCenter,
-                        child: TriangleIndicator(
-                          color: Colors.red,
+      double wheelSize) {
+    return GestureDetector(
+      onTap: _currentQuestion == null
+          ? () => _spinWheel(questions)
+          : _removeQuestion,
+      child: RotatedBox(
+        quarterTurns: 1,
+        child: Container(
+          decoration: BoxDecoration(color: backgroundColor),
+          child: Center(
+            child: SizedBox(
+              height: wheelSize,
+              width: wheelSize,
+              child: FortuneWheel(
+                indicators: const [
+                  FortuneIndicator(
+                      alignment: Alignment.topCenter,
+                      child: TriangleIndicator(
+                        color: Colors.red,
+                      ))
+                ],
+                duration: _spinDuration,
+                selected: selected.stream,
+                rotationCount: _spinDuration.inSeconds * 2,
+                items: questions.keys
+                    .toList()
+                    .asMap()
+                    .entries
+                    .map<FortuneItem>((e) => FortuneItem(
+                          style: FortuneItemStyle(
+                              color: _getFillColor(Colors.blue, e.key)),
+                          child: AutoSizeText(e.value,
+                              maxLines: 1,
+                              style: TextStyle(fontSize: wheelSize / 20)),
                         ))
-                  ],
-                  duration: _spinDuration,
-                  selected: selected.stream,
-                  rotationCount: _spinDuration.inSeconds * 2,
-                  items: questions.keys
-                      .toList()
-                      .asMap()
-                      .entries
-                      .map<FortuneItem>((e) => FortuneItem(
-                            style: FortuneItemStyle(
-                                color: _getFillColor(Colors.blue, e.key)),
-                            child: AutoSizeText(e.value,
-                                maxLines: 1,
-                                style: TextStyle(fontSize: wheelSize / 20)),
-                          ))
-                      .toList(),
-                ),
+                    .toList(),
               ),
             ),
           ),
         ),
-      );
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -147,6 +161,8 @@ class _WheelScreenState extends State<WheelScreen> {
 
             final questions = snapshot.data!;
             final wheel = _buildWheel(questions, backgroundColor, wheelSize);
+            widget.connector.messageCallback = (sender, message) =>
+                _spinIfTwichAsks(sender, message, questions);
 
             return Stack(
               alignment: Alignment.center,
