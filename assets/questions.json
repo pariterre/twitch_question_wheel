@@ -1,8 +1,44 @@
 {
-    "Vie professionnelle":["Q1", "Q2"],
-    "Vie personnelle": ["Q3", "Q4"],
-    "Méthode pomodoro": ["Q5"],
-    "Anecdote": ["Q6", "Q7", "Q8"],
-    "Bonne bouffe": ["Q9"],
-    "Voyage": ["Q10", "Q11"]
+    "Vie professionnelle":[
+        "Que fais-tu dans la vie?", 
+        "Quel est ton accomplissement professionnel dont tu es le plus fier?",
+        "Sur quel projet travailles-tu actuellement?",
+        "Comment la diffusion sur Twitch impacte ta vie professionnelle?",
+        "Quel est le meilleur conseil professionnel que tu as reçu dans ta vie?",
+        "Quel est le travail le plus drôle que tu as eu?"
+    ],
+    "Vie personnelle": [
+        "En dehors de Twitch, quels sont tes principaux hobbies?", 
+        "Quelle est la personne qui t'a le plus influencé personnellement?",
+        "Une question à poser à un personnage historique vivant ou mort. Quelle question et à qui?",
+        "Chat ou chien?",
+        "Tu dois apporter un seul livre sur une île déserte, lequel?"
+    ],
+    "Méthode pomodoro": [
+        "Comment as-tu découvert la méthode Pomodoro?",
+        "As-tu des conseils pour les débutant.e.s qui souhaitent essayer la méthode Pomodoro?",
+        "Quels sont les avantages que tu vois dans la méthode Pomodoro?",
+        "Tomates ou tomatines (25 minutes ou 50 minutes)? Pourquoi?",
+        "Quelle est ta stratégie de travaille à l'intérieur d'une tomate?"
+    ],
+    "Anecdote": [
+        "Quel est le pire cadeau que tu as reçu?", 
+        "Une belle histoire de streaming à raconter?", 
+        "Quel est le meilleur concert auquel tu aies jamais assisté?",
+        ""
+    ],
+    "Bonne bouffe": [
+        "Quel est ton plat préféré?",
+        "Un aliment que tu n'aimes pas, mais que tu aimerais apprendre à apprécier?",
+        "Ton plus grand échec culinaire?",
+        "Ton plus grand succès culinaire?",
+        "Poutine ou tartiflette?"
+    ],
+    "Voyage": [
+        "Quel est ton meilleur souvenir de vacances?", 
+        "Quel est ton endroit préféré pour te détendre?",
+        "Un endroit incongru où tu es allé.e?",
+        "Quel est l'endroit de ton prochain voyage?",
+        "À quel endroit n'iras-tu jamais?"
+    ]
 }
