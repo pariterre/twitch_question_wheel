@@ -6,23 +6,22 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_fortune_wheel/flutter_fortune_wheel.dart';
-
-import '/models/twitch_connector.dart';
+import 'package:twitch_manager/twitch_manager.dart';
 
 class WheelScreen extends StatefulWidget {
-  const WheelScreen(
-      {super.key, required this.questionsPath, required this.connector});
+  const WheelScreen({super.key, required this.questionsPath});
 
   static const route = "/wheel-screen";
 
   final String questionsPath;
-  final TwitchConnector connector;
 
   @override
   State<WheelScreen> createState() => _WheelScreenState();
 }
 
 class _WheelScreenState extends State<WheelScreen> {
+  TwitchManager? twitchManager;
+
   StreamController<int> selected = StreamController<int>();
   final _spinDuration = const Duration(seconds: 3);
   DateTime _spinStartingTime = DateTime.now();
@@ -55,7 +54,7 @@ class _WheelScreenState extends State<WheelScreen> {
     if (message != '!spin') return;
     if (!_spinWheel(questions)) return;
 
-    widget.connector.send('Et ça toooourneee!!!');
+    twitchManager!.irc!.send('Et ça toooourneee!!!');
   }
 
   Color _getFillColor(Color color, int index) {
@@ -89,6 +88,7 @@ class _WheelScreenState extends State<WheelScreen> {
 
   void _askQuestion(String nextQuestion) {
     _currentQuestion = nextQuestion;
+    twitchManager!.irc!.send(_currentQuestion!);
     Future.delayed(_questionDuration, _removeQuestion);
     setState(() {});
   }
@@ -118,7 +118,6 @@ class _WheelScreenState extends State<WheelScreen> {
                       alignment: Alignment.topCenter,
                       child: TriangleIndicator(color: Colors.red))
                 ],
-
                 duration: _spinDuration,
                 selected: selected.stream,
                 rotationCount: _spinDuration.inSeconds * 2,
@@ -128,7 +127,6 @@ class _WheelScreenState extends State<WheelScreen> {
                     .asMap()
                     .entries
                     .map<FortuneItem>((e) => FortuneItem(
-                      
                           style: FortuneItemStyle(
                               borderColor: Colors.black,
                               borderWidth: 5,
@@ -154,6 +152,8 @@ class _WheelScreenState extends State<WheelScreen> {
     final windowSize = MediaQuery.of(context).size;
     final wheelSize = min(windowSize.height, windowSize.width) * 0.95;
 
+    twitchManager = ModalRoute.of(context)!.settings.arguments as TwitchManager;
+
     return Scaffold(
       body: FutureBuilder(
           future: _questions,
@@ -166,7 +166,7 @@ class _WheelScreenState extends State<WheelScreen> {
 
             final questions = snapshot.data!;
             final wheel = _buildWheel(questions, backgroundColor, wheelSize);
-            widget.connector.messageCallback = (sender, message) =>
+            twitchManager!.irc!.messageCallback = (sender, message) =>
                 _spinIfTwichAsks(sender, message, questions);
 
             return Stack(
