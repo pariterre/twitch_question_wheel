@@ -116,23 +116,28 @@ class _WheelScreenState extends State<WheelScreen> {
                 indicators: const [
                   FortuneIndicator(
                       alignment: Alignment.topCenter,
-                      child: TriangleIndicator(
-                        color: Colors.red,
-                      ))
+                      child: TriangleIndicator(color: Colors.red))
                 ],
+
                 duration: _spinDuration,
                 selected: selected.stream,
                 rotationCount: _spinDuration.inSeconds * 2,
+                animateFirst: false,
                 items: questions.keys
                     .toList()
                     .asMap()
                     .entries
                     .map<FortuneItem>((e) => FortuneItem(
+                      
                           style: FortuneItemStyle(
+                              borderColor: Colors.black,
+                              borderWidth: 5,
                               color: _getFillColor(Colors.blue, e.key)),
-                          child: AutoSizeText(e.value,
-                              maxLines: 1,
-                              style: TextStyle(fontSize: wheelSize / 20)),
+                          child: Text(
+                            e.value,
+                            maxLines: 1,
+                            style: TextStyle(fontSize: wheelSize / 25),
+                          ),
                         ))
                     .toList(),
               ),
