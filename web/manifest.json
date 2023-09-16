@@ -1,6 +1,6 @@
 {
-    "name": "pomodoro_wheel",
-    "short_name": "pomodoro_wheel",
+    "name": "question_wheel",
+    "short_name": "question_wheel",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

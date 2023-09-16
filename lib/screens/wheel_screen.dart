@@ -44,6 +44,13 @@ class _WheelScreenState extends State<WheelScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    twitchManager ??=
+        ModalRoute.of(context)!.settings.arguments as TwitchManager;
+  }
+
+  @override
   void dispose() {
     selected.close();
     super.dispose();
@@ -54,7 +61,7 @@ class _WheelScreenState extends State<WheelScreen> {
     if (message != '!spin') return;
     if (!_spinWheel(questions)) return;
 
-    twitchManager!.irc!.send('Et ça toooourneee!!!');
+    twitchManager!.irc.send('Et ça toooourneee!!!');
   }
 
   Color _getFillColor(Color color, int index) {
@@ -88,7 +95,7 @@ class _WheelScreenState extends State<WheelScreen> {
 
   void _askQuestion(String nextQuestion) {
     _currentQuestion = nextQuestion;
-    twitchManager!.irc!.send(_currentQuestion!);
+    twitchManager!.irc.send(_currentQuestion!);
     Future.delayed(_questionDuration, _removeQuestion);
     setState(() {});
   }
@@ -152,8 +159,6 @@ class _WheelScreenState extends State<WheelScreen> {
     final windowSize = MediaQuery.of(context).size;
     final wheelSize = min(windowSize.height, windowSize.width) * 0.95;
 
-    twitchManager = ModalRoute.of(context)!.settings.arguments as TwitchManager;
-
     return Scaffold(
       body: FutureBuilder(
           future: _questions,
@@ -166,7 +171,7 @@ class _WheelScreenState extends State<WheelScreen> {
 
             final questions = snapshot.data!;
             final wheel = _buildWheel(questions, backgroundColor, wheelSize);
-            twitchManager!.irc!.messageCallback = (sender, message) =>
+            twitchManager!.irc.messageCallback = (sender, message) =>
                 _spinIfTwichAsks(sender, message, questions);
 
             return Stack(
@@ -195,6 +200,8 @@ class _WheelScreenState extends State<WheelScreen> {
                       ),
                     ),
                   ),
+                if (twitchManager != null)
+                  TwitchDebugPanel(manager: twitchManager!),
               ],
             );
           }),

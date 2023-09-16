@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:pomodoro_wheel/screens/wheel_screen.dart';
 import 'package:twitch_manager/twitch_manager.dart';
-
-import '/screens/wheel_screen.dart';
-import '/screens/twitch_authentication_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,19 +13,31 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(initialRoute: TwitchAuthenticationScreen.route, routes: {
-      TwitchAuthenticationScreen.route: (ctx) =>
-          const TwitchAuthenticationScreen(
-            nextRoute: WheelScreen.route,
-            appId: 'mcysoxq3vitdjwcqn71f8opz11cyex',
-            scope: [
-              TwitchScope.chatRead,
-              TwitchScope.chatEdit,
-              TwitchScope.chatters,
-              TwitchScope.readFollowers,
-              TwitchScope.readSubscribers,
-            ],
-            moderatorName: 'BotBleuet',
-            streamerName: 'pariterre',
+      TwitchAuthenticationScreen.route: (ctx) => TwitchAuthenticationScreen(
+            onFinishedConnexion: (twitchManager) {
+              Navigator.of(ctx).pushReplacementNamed(WheelScreen.route,
+                  arguments: twitchManager);
+            },
+            mockOptions: const TwitchMockOptions(
+                isActive: false,
+                messagesFollowers: ['!spin'],
+                messagesModerators: ['!spin']),
+            appInfo: TwitchAppInfo(
+              appName: 'QuestionWheel',
+              twitchAppId: 'bobffcezcrakzkqv62h78i04vxkx72',
+              redirectAddress:
+                  'https://twitchauthentication.pariterre.net:3000',
+              authenticationServiceAddress:
+                  'wss://twitchauthentication.pariterre.net:3002',
+              scope: [
+                TwitchScope.chatRead,
+                TwitchScope.chatEdit,
+                TwitchScope.chatters,
+                TwitchScope.readFollowers,
+                TwitchScope.readSubscribers,
+              ],
+              useAuthenticationService: true,
+            ),
           ),
       WheelScreen.route: (ctx) =>
           const WheelScreen(questionsPath: 'assets/questions.json'),
