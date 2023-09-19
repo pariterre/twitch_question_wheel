@@ -20,6 +20,7 @@ class WheelScreen extends StatefulWidget {
 }
 
 class _WheelScreenState extends State<WheelScreen> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   TwitchManager? twitchManager;
 
   StreamController<int> selected = StreamController<int>();
@@ -94,6 +95,8 @@ class _WheelScreenState extends State<WheelScreen> {
   }
 
   void _askQuestion(String nextQuestion) {
+    if (!mounted) return;
+
     _currentQuestion = nextQuestion;
     twitchManager!.irc.send(_currentQuestion!);
     Future.delayed(_questionDuration, _removeQuestion);
@@ -101,6 +104,8 @@ class _WheelScreenState extends State<WheelScreen> {
   }
 
   void _removeQuestion() {
+    if (!mounted) return;
+
     _currentQuestion = null;
     setState(() {});
   }
@@ -160,6 +165,7 @@ class _WheelScreenState extends State<WheelScreen> {
     final wheelSize = min(windowSize.height, windowSize.width) * 0.95;
 
     return Scaffold(
+      key: _scaffoldKey,
       body: FutureBuilder(
           future: _questions,
           builder: (context, snapshot) {
@@ -202,9 +208,45 @@ class _WheelScreenState extends State<WheelScreen> {
                   ),
                 if (twitchManager != null)
                   TwitchDebugPanel(manager: twitchManager!),
+                Positioned(
+                    left: 12,
+                    top: 12,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(25),
+                      onTap: () {
+                        _scaffoldKey.currentState!.openDrawer();
+                      },
+                      child: const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Icon(
+                          Icons.menu,
+                          color: Colors.black,
+                        ),
+                      ),
+                    )),
               ],
             );
           }),
+      drawer: Drawer(
+        child: ListView(
+          // Important: Remove any padding from the ListView.
+          padding: EdgeInsets.zero,
+          children: [
+            const ListTile(
+              title: Text('Éditeur de questions (À VENIR)'),
+            ),
+            ListTile(
+              title: const Text('Déconnexion de Twitch'),
+              onTap: () async {
+                final navigator = Navigator.of(context);
+                await twitchManager!.disconnect();
+                navigator
+                    .pushReplacementNamed(TwitchAuthenticationScreen.route);
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
