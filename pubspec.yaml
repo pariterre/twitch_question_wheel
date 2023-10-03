@@ -35,6 +35,11 @@ dependencies:
   auto_size_text: ^3.0.0
   twitch_manager:
     path: ./plugins/twitch_manager
+  shared_preferences: ^2.2.0
+  universal_html: ^2.2.3
+  file_picker: ^5.3.3
+  provider: ^6.0.5
+  flutter_colorpicker: ^1.0.3
 
 
   # The following adds the Cupertino Icons font to your application.

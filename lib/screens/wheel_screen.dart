@@ -6,6 +6,8 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_fortune_wheel/flutter_fortune_wheel.dart';
+import 'package:pomodoro_wheel/providers/app_preferences.dart';
+import 'package:pomodoro_wheel/widgets/my_drawer.dart';
 import 'package:twitch_manager/twitch_manager.dart';
 
 class WheelScreen extends StatefulWidget {
@@ -21,7 +23,8 @@ class WheelScreen extends StatefulWidget {
 
 class _WheelScreenState extends State<WheelScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  TwitchManager? twitchManager;
+  late TwitchManager? twitchManager =
+      ModalRoute.of(context)!.settings.arguments as TwitchManager;
 
   StreamController<int> selected = StreamController<int>();
   final _spinDuration = const Duration(seconds: 3);
@@ -42,13 +45,6 @@ class _WheelScreenState extends State<WheelScreen> {
     return data.map<String, List<String>>((String key, value) {
       return MapEntry(key, (value as List).map<String>((e) => e).toList());
     });
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    twitchManager ??=
-        ModalRoute.of(context)!.settings.arguments as TwitchManager;
   }
 
   @override
@@ -160,7 +156,8 @@ class _WheelScreenState extends State<WheelScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const backgroundColor = Color.fromARGB(255, 0, 255, 0);
+    final preferences = AppPreferences.of(context);
+
     final windowSize = MediaQuery.of(context).size;
     final wheelSize = min(windowSize.height, windowSize.width) * 0.95;
 
@@ -176,7 +173,8 @@ class _WheelScreenState extends State<WheelScreen> {
             }
 
             final questions = snapshot.data!;
-            final wheel = _buildWheel(questions, backgroundColor, wheelSize);
+            final wheel =
+                _buildWheel(questions, preferences.backgroundColor, wheelSize);
             twitchManager!.irc.messageCallback = (sender, message) =>
                 _spinIfTwichAsks(sender, message, questions);
 
@@ -227,26 +225,7 @@ class _WheelScreenState extends State<WheelScreen> {
               ],
             );
           }),
-      drawer: Drawer(
-        child: ListView(
-          // Important: Remove any padding from the ListView.
-          padding: EdgeInsets.zero,
-          children: [
-            const ListTile(
-              title: Text('Éditeur de questions (À VENIR)'),
-            ),
-            ListTile(
-              title: const Text('Déconnexion de Twitch'),
-              onTap: () async {
-                final navigator = Navigator.of(context);
-                await twitchManager!.disconnect();
-                navigator
-                    .pushReplacementNamed(TwitchAuthenticationScreen.route);
-              },
-            ),
-          ],
-        ),
-      ),
+      drawer: MyDrawer(twitchManager: twitchManager),
     );
   }
 }

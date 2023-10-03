@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:pomodoro_wheel/providers/app_preferences.dart';
 import 'package:pomodoro_wheel/screens/wheel_screen.dart';
+import 'package:provider/provider.dart';
 import 'package:twitch_manager/twitch_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+  final preferences = await AppPreferences.factory();
+
+  runApp(MultiProvider(providers: [
+    ChangeNotifierProvider(create: (context) => preferences),
+  ], child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -21,7 +27,7 @@ class MyApp extends StatelessWidget {
                     arguments: twitchManager);
               },
               mockOptions: const TwitchMockOptions(
-                  isActive: false,
+                  isActive: true,
                   messagesFollowers: ['!spin'],
                   messagesModerators: ['!spin']),
               appInfo: TwitchAppInfo(
