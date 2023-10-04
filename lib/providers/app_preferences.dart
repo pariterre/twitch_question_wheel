@@ -1,8 +1,6 @@
 import 'dart:convert';
-import 'dart:js_interop';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pomodoro_wheel/models/questions.dart';
 import 'package:provider/provider.dart';
@@ -16,14 +14,14 @@ class AppPreferences with ChangeNotifier {
   Color get backgroundColor => _backgroundColor;
   set backgrondColor(Color value) {
     _backgroundColor = value;
-    notifyListeners();
+    _save();
   }
 
   Questions _questions;
   Questions get questions => _questions;
   void addQuestion(String category, String question) {
     _questions.addQuestion(category, question);
-    notifyListeners();
+    _save();
   }
 
   ///
@@ -34,7 +32,9 @@ class AppPreferences with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> exportPreferences() async {
+  ///
+  /// Export the current preferences to a file
+  Future<void> savePreferences() async {
     const encoder = JsonEncoder.withIndent('\t');
     final text = encoder.convert(serialize(skipBinaryFiles: true));
 

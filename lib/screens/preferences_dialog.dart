@@ -14,6 +14,7 @@ class PreferencesDialog extends StatelessWidget {
           const SizedBox(height: 12),
           _backgroundColorTileBuild(context),
           _editQuestionsTileBuild(context),
+          _savePreferencesTileBuild(context),
           _loadPreferencesTileBuild(context),
         ],
       ),
@@ -28,14 +29,28 @@ class PreferencesDialog extends StatelessWidget {
         height: 50,
         color: AppPreferences.of(context).backgroundColor,
       ),
-      onTap: () => _onTapEditQuestions(context),
+      onTap: () => _onTapPickColor(context),
     );
   }
 
   ListTile _editQuestionsTileBuild(BuildContext context) {
     return ListTile(
       title: const Text('Éditer les questions'),
-      onTap: () => _onTapPickColor(context),
+      onTap: () => _onTapEditQuestions(context),
+    );
+  }
+
+  Widget _savePreferencesTileBuild(BuildContext context) {
+    return ListTile(
+      title: const Text('Sauvegarder les préférences'),
+      onTap: () => _onTapSavePreferences(context),
+    );
+  }
+
+  Widget _loadPreferencesTileBuild(BuildContext context) {
+    return ListTile(
+      title: const Text('Charger les préférences'),
+      onTap: () => _onTapLoadPreferences(context),
     );
   }
 
@@ -84,17 +99,19 @@ class PreferencesDialog extends StatelessWidget {
     );
   }
 
-  Widget _loadPreferencesTileBuild(BuildContext context) {
-    return ListTile(
-      title: const Text('Charger les préférences'),
-      onTap: () => _onTapLoadPreferences(context),
-    );
+  void _onTapSavePreferences(context) async {
+    final preferences = AppPreferences.of(context, listen: false);
+    final navigator = Navigator.of(context);
+    await preferences.savePreferences();
+    navigator.pop(); // pop the dialog
+    navigator.pop(); // pop the drawer
   }
 
   void _onTapLoadPreferences(context) async {
     final preferences = AppPreferences.of(context, listen: false);
     final navigator = Navigator.of(context);
     await preferences.loadPreferences();
-    navigator.pop();
+    navigator.pop(); // pop the dialog
+    navigator.pop(); // pop the drawer
   }
 }
