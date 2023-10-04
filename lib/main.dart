@@ -47,8 +47,7 @@ class MyApp extends StatelessWidget {
                 useAuthenticationService: true,
               ),
             ),
-        WheelScreen.route: (ctx) =>
-            const WheelScreen(questionsPath: 'assets/questions.json'),
+        WheelScreen.route: (ctx) => const WheelScreen(),
       },
     );
   }

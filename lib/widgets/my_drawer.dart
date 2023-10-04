@@ -14,9 +14,6 @@ class MyDrawer extends StatelessWidget {
         // Important: Remove any padding from the ListView.
         padding: EdgeInsets.zero,
         children: [
-          const ListTile(
-            title: Text('Éditeur de questions (À VENIR)'),
-          ),
           ListTile(
             title: const Text('Préférences'),
             onTap: () => showDialog(

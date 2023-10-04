@@ -1,21 +1,18 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_fortune_wheel/flutter_fortune_wheel.dart';
+import 'package:pomodoro_wheel/models/questions.dart';
 import 'package:pomodoro_wheel/providers/app_preferences.dart';
 import 'package:pomodoro_wheel/widgets/my_drawer.dart';
 import 'package:twitch_manager/twitch_manager.dart';
 
 class WheelScreen extends StatefulWidget {
-  const WheelScreen({super.key, required this.questionsPath});
+  const WheelScreen({super.key});
 
   static const route = "/wheel-screen";
-
-  final String questionsPath;
 
   @override
   State<WheelScreen> createState() => _WheelScreenState();
@@ -30,22 +27,8 @@ class _WheelScreenState extends State<WheelScreen> {
   final _spinDuration = const Duration(seconds: 3);
   DateTime _spinStartingTime = DateTime.now();
 
-  late Future<Map<String, List<String>>> _questions;
   String? _currentQuestion;
   final _questionDuration = const Duration(seconds: 10);
-
-  @override
-  void initState() {
-    super.initState();
-    _questions = _loadQuestions();
-  }
-
-  Future<Map<String, List<String>>> _loadQuestions() async {
-    final data = jsonDecode(await rootBundle.loadString(widget.questionsPath));
-    return data.map<String, List<String>>((String key, value) {
-      return MapEntry(key, (value as List).map<String>((e) => e).toList());
-    });
-  }
 
   @override
   void dispose() {
@@ -53,8 +36,7 @@ class _WheelScreenState extends State<WheelScreen> {
     super.dispose();
   }
 
-  void _spinIfTwichAsks(
-      String sender, String message, Map<String, List<String>> questions) {
+  void _spinIfTwichAsks(String sender, String message, Questions questions) {
     if (message != '!spin') return;
     if (!_spinWheel(questions)) return;
 
@@ -70,7 +52,7 @@ class _WheelScreenState extends State<WheelScreen> {
     );
   }
 
-  bool _spinWheel(Map<String, List<String>> questions) {
+  bool _spinWheel(Questions questions) {
     if (DateTime.now().subtract(_spinDuration).compareTo(_spinStartingTime) <
         0) {
       // Not enough time from the last spin then don't rotate
@@ -78,11 +60,9 @@ class _WheelScreenState extends State<WheelScreen> {
     }
 
     _spinStartingTime = DateTime.now();
-    final nextCategoryIndex = Fortune.randomInt(0, questions.length);
-    final nextCategory = questions.keys.toList()[nextCategoryIndex];
-    final categoryQuestions = questions[nextCategory]!;
+    final nextCategoryIndex = questions.pickNextCategoryIndex();
     final nextQuestion =
-        categoryQuestions[Fortune.randomInt(0, categoryQuestions.length)];
+        questions.categories[nextCategoryIndex].pickNextQuestion();
 
     selected.add(nextCategoryIndex);
     Future.delayed(_spinDuration, () => _askQuestion(nextQuestion));
@@ -106,8 +86,11 @@ class _WheelScreenState extends State<WheelScreen> {
     setState(() {});
   }
 
-  Widget _buildWheel(Map<String, List<String>> questions, Color backgroundColor,
-      double wheelSize) {
+  Widget _buildWheel(
+      Questions questions, Color backgroundColor, double wheelSize) {
+    if (questions.length == 0) {
+      return const Center(child: Text('Svp ajouter des questions'));
+    }
     return GestureDetector(
       onTap: _currentQuestion == null
           ? () => _spinWheel(questions)
@@ -130,17 +113,16 @@ class _WheelScreenState extends State<WheelScreen> {
                 selected: selected.stream,
                 rotationCount: _spinDuration.inSeconds * 2,
                 animateFirst: false,
-                items: questions.keys
-                    .toList()
+                items: questions.categories
                     .asMap()
-                    .entries
-                    .map<FortuneItem>((e) => FortuneItem(
+                    .keys
+                    .map<FortuneItem>((index) => FortuneItem(
                           style: FortuneItemStyle(
                               borderColor: Colors.black,
                               borderWidth: 5,
-                              color: _getFillColor(Colors.blue, e.key)),
+                              color: _getFillColor(Colors.blue, index)),
                           child: Text(
-                            e.value,
+                            questions.categories[index].name,
                             maxLines: 1,
                             style: TextStyle(fontSize: wheelSize / 25),
                           ),
@@ -161,70 +143,59 @@ class _WheelScreenState extends State<WheelScreen> {
     final windowSize = MediaQuery.of(context).size;
     final wheelSize = min(windowSize.height, windowSize.width) * 0.95;
 
+    final questions = preferences.questions;
+    final wheel =
+        _buildWheel(questions, preferences.backgroundColor, wheelSize);
+
+    twitchManager!.irc.messageCallback =
+        (sender, message) => _spinIfTwichAsks(sender, message, questions);
+
     return Scaffold(
       key: _scaffoldKey,
-      body: FutureBuilder(
-          future: _questions,
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-
-            final questions = snapshot.data!;
-            final wheel =
-                _buildWheel(questions, preferences.backgroundColor, wheelSize);
-            twitchManager!.irc.messageCallback = (sender, message) =>
-                _spinIfTwichAsks(sender, message, questions);
-
-            return Stack(
-              alignment: Alignment.center,
-              children: [
-                wheel,
-                if (_currentQuestion != null)
-                  Positioned(
-                    bottom: wheelSize / 2,
-                    child: Container(
-                      decoration:
-                          BoxDecoration(color: Colors.blue.withAlpha(250)),
-                      width: wheelSize * 6 / 5,
-                      height: wheelSize / 5,
-                      child: Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: AutoSizeText(
-                            _currentQuestion!,
-                            maxLines: 2,
-                            style: TextStyle(
-                                color: Colors.white, fontSize: wheelSize / 20),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
+      body: Stack(
+        alignment: Alignment.center,
+        children: [
+          wheel,
+          if (_currentQuestion != null)
+            Positioned(
+              bottom: wheelSize / 2,
+              child: Container(
+                decoration: BoxDecoration(color: Colors.blue.withAlpha(250)),
+                width: wheelSize * 6 / 5,
+                height: wheelSize / 5,
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: AutoSizeText(
+                      _currentQuestion!,
+                      maxLines: 2,
+                      style: TextStyle(
+                          color: Colors.white, fontSize: wheelSize / 20),
+                      textAlign: TextAlign.center,
                     ),
                   ),
-                if (twitchManager != null)
-                  TwitchDebugPanel(manager: twitchManager!),
-                Positioned(
-                    left: 12,
-                    top: 12,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(25),
-                      onTap: () {
-                        _scaffoldKey.currentState!.openDrawer();
-                      },
-                      child: const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Icon(
-                          Icons.menu,
-                          color: Colors.black,
-                        ),
-                      ),
-                    )),
-              ],
-            );
-          }),
+                ),
+              ),
+            ),
+          if (twitchManager != null) TwitchDebugPanel(manager: twitchManager!),
+          Positioned(
+              left: 12,
+              top: 12,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(25),
+                onTap: () {
+                  _scaffoldKey.currentState!.openDrawer();
+                },
+                child: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Icon(
+                    Icons.menu,
+                    color: Colors.black,
+                  ),
+                ),
+              )),
+        ],
+      ),
       drawer: MyDrawer(twitchManager: twitchManager),
     );
   }

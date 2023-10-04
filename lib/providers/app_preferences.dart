@@ -1,7 +1,10 @@
 import 'dart:convert';
+import 'dart:js_interop';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:pomodoro_wheel/models/questions.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_html/html.dart' as html;
@@ -13,6 +16,13 @@ class AppPreferences with ChangeNotifier {
   Color get backgroundColor => _backgroundColor;
   set backgrondColor(Color value) {
     _backgroundColor = value;
+    notifyListeners();
+  }
+
+  Questions _questions;
+  Questions get questions => _questions;
+  void addQuestion(String category, String question) {
+    _questions.addQuestion(category, question);
     notifyListeners();
   }
 
@@ -46,7 +56,7 @@ class AppPreferences with ChangeNotifier {
     html.Url.revokeObjectUrl(url);
   }
 
-  Future<void> importWeb() async {
+  Future<void> loadPreferences() async {
     final result = await FilePicker.platform.pickFiles();
     if (result == null) return;
 
@@ -58,7 +68,6 @@ class AppPreferences with ChangeNotifier {
   }
 
   // CONSTRUCTOR AND ACCESSORS
-
   ///
   /// Main accessor of the AppPreference
   static AppPreferences of(BuildContext context, {listen = true}) =>
@@ -87,12 +96,17 @@ class AppPreferences with ChangeNotifier {
     // Call the real constructor
     final backgroundColor =
         Color(previousPreferences['backgroundColor'] ?? 0x00000000);
-    return AppPreferences._(backgroundColor: backgroundColor);
+    final questions =
+        Questions.fromSerialized(previousPreferences['questions'] ?? {});
+    return AppPreferences._(
+        backgroundColor: backgroundColor, questions: questions);
   }
 
   AppPreferences._({
     required Color backgroundColor,
-  }) : _backgroundColor = backgroundColor;
+    required Questions questions,
+  })  : _backgroundColor = backgroundColor,
+        _questions = questions;
 
   // INTERNAL METHODS
   ///
@@ -101,11 +115,13 @@ class AppPreferences with ChangeNotifier {
   /// Serialize all the values
   Map<String, dynamic> serialize({bool skipBinaryFiles = false}) => {
         'backgroundColor': _backgroundColor.value,
+        'questions': _questions.serialize(),
       };
 
   ///
   /// Reset the app configuration to their original values
   void updateFromSerialized(map) async {
     _backgroundColor = Color(map['backgroundColor'] ?? 0x0000000);
+    _questions = Questions.fromSerialized(map['questions'] ?? {});
   }
 }
