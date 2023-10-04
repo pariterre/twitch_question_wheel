@@ -19,8 +19,33 @@ class AppPreferences with ChangeNotifier {
 
   Questions _questions;
   Questions get questions => _questions;
+  void addCategory(String category) {
+    _questions.addCategory(category);
+    _save();
+  }
+
+  void editCategory(String oldCategory, String newCategory) {
+    _questions.editCategory(oldCategory, newCategory);
+    _save();
+  }
+
+  void deleteCategory(String category) {
+    _questions.deleteCategory(category);
+    _save();
+  }
+
   void addQuestion(String category, String question) {
     _questions.addQuestion(category, question);
+    _save();
+  }
+
+  void editQuestion(String category, String oldQuestion, String newQuestion) {
+    _questions.editQuestion(category, oldQuestion, newQuestion);
+    _save();
+  }
+
+  void deleteQuestion(String category, String question) {
+    _questions.deleteQuestion(category, question);
     _save();
   }
 

@@ -88,7 +88,7 @@ class _WheelScreenState extends State<WheelScreen> {
 
   Widget _buildWheel(
       Questions questions, Color backgroundColor, double wheelSize) {
-    if (questions.length == 0) {
+    if (questions.notHasEnoughQuestions) {
       return const Center(child: Text('Svp ajouter des questions'));
     }
     return GestureDetector(
