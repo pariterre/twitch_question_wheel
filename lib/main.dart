@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
                     arguments: twitchManager);
               },
               mockOptions: const TwitchMockOptions(
-                  isActive: true,
+                  isActive: false,
                   messagesFollowers: ['!spin'],
                   messagesModerators: ['!spin']),
               appInfo: TwitchAppInfo(
