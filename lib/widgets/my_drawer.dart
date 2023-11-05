@@ -106,14 +106,14 @@ class MyDrawer extends StatelessWidget {
   void _onTapSavePreferences(context) async {
     final preferences = AppPreferences.of(context, listen: false);
     final navigator = Navigator.of(context);
-    await preferences.savePreferences();
+    await preferences.savePreferences(context);
     navigator.pop();
   }
 
   void _onTapLoadPreferences(context) async {
     final preferences = AppPreferences.of(context, listen: false);
     final navigator = Navigator.of(context);
-    await preferences.loadPreferences();
+    await preferences.loadPreferences(context);
     navigator.pop();
   }
 }
