@@ -40,7 +40,7 @@ class _WheelScreenState extends State<WheelScreen> {
     if (message != '!spin') return;
     if (!_spinWheel(questions)) return;
 
-    twitchManager!.irc.send('Et ça toooourneee!!!');
+    twitchManager!.chat.send('Et ça toooourneee!!!');
   }
 
   Color _getFillColor(Color color, int index) {
@@ -74,7 +74,7 @@ class _WheelScreenState extends State<WheelScreen> {
     if (!mounted) return;
 
     _currentQuestion = nextQuestion;
-    twitchManager!.irc.send(_currentQuestion!);
+    twitchManager!.chat.send(_currentQuestion!);
     Future.delayed(_questionDuration, _removeQuestion);
     setState(() {});
   }
@@ -147,54 +147,56 @@ class _WheelScreenState extends State<WheelScreen> {
     final wheel =
         _buildWheel(questions, preferences.backgroundColor, wheelSize);
 
-    twitchManager!.irc.messageCallback =
-        (sender, message) => _spinIfTwichAsks(sender, message, questions);
+    twitchManager!.chat.onMessageReceived(
+        (sender, message) => _spinIfTwichAsks(sender, message, questions));
 
     return Scaffold(
       key: _scaffoldKey,
-      body: Stack(
-        alignment: Alignment.center,
-        children: [
-          wheel,
-          if (_currentQuestion != null)
-            Positioned(
-              bottom: wheelSize / 2,
-              child: Container(
-                decoration: BoxDecoration(color: Colors.blue.withAlpha(250)),
-                width: wheelSize * 6 / 5,
-                height: wheelSize / 5,
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: AutoSizeText(
-                      _currentQuestion!,
-                      maxLines: 2,
-                      style: TextStyle(
-                          color: Colors.white, fontSize: wheelSize / 20),
-                      textAlign: TextAlign.center,
+      body: TwitchDebugOverlay(
+        manager: twitchManager,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            wheel,
+            if (_currentQuestion != null)
+              Positioned(
+                bottom: wheelSize / 2,
+                child: Container(
+                  decoration: BoxDecoration(color: Colors.blue.withAlpha(250)),
+                  width: wheelSize * 6 / 5,
+                  height: wheelSize / 5,
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: AutoSizeText(
+                        _currentQuestion!,
+                        maxLines: 2,
+                        style: TextStyle(
+                            color: Colors.white, fontSize: wheelSize / 20),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          if (twitchManager != null) TwitchDebugPanel(manager: twitchManager!),
-          Positioned(
-              left: 12,
-              top: 12,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(25),
-                onTap: () {
-                  _scaffoldKey.currentState!.openDrawer();
-                },
-                child: const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Icon(
-                    Icons.menu,
-                    color: Colors.black,
+            Positioned(
+                left: 12,
+                top: 12,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(25),
+                  onTap: () {
+                    _scaffoldKey.currentState!.openDrawer();
+                  },
+                  child: const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Icon(
+                      Icons.menu,
+                      color: Colors.black,
+                    ),
                   ),
-                ),
-              )),
-        ],
+                )),
+          ],
+        ),
       ),
       drawer: MyDrawer(twitchManager: twitchManager),
     );

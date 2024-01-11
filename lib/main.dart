@@ -22,29 +22,31 @@ class MyApp extends StatelessWidget {
       initialRoute: TwitchAuthenticationScreen.route,
       routes: {
         TwitchAuthenticationScreen.route: (ctx) => TwitchAuthenticationScreen(
+              isMockActive: true,
               onFinishedConnexion: (twitchManager) {
                 Navigator.of(ctx).pushReplacementNamed(WheelScreen.route,
                     arguments: twitchManager);
               },
-              mockOptions: const TwitchMockOptions(
-                  isActive: false,
-                  messagesFollowers: ['!spin'],
-                  messagesModerators: ['!spin']),
               appInfo: TwitchAppInfo(
                 appName: 'QuestionWheel',
                 twitchAppId: 'bobffcezcrakzkqv62h78i04vxkx72',
-                redirectAddress:
-                    'https://twitchauthentication.pariterre.net:3000',
-                authenticationServiceAddress:
-                    'wss://twitchauthentication.pariterre.net:3002',
+                redirectDomain: 'twitchauthentication.pariterre.net',
                 scope: [
                   TwitchScope.chatRead,
                   TwitchScope.chatEdit,
                   TwitchScope.chatters,
                   TwitchScope.readFollowers,
-                  TwitchScope.readSubscribers,
+                  TwitchScope.readModerator,
                 ],
-                useAuthenticationService: true,
+              ),
+              debugPanelOptions: TwitchDebugPanelOptions(
+                chatters: [
+                  TwitchChatterMock(displayName: 'Streamer', isModerator: true),
+                  TwitchChatterMock(
+                      displayName: 'Moderator 1', isModerator: true),
+                  TwitchChatterMock(displayName: 'Viewer 1'),
+                ],
+                chatMessages: const ['!spin'],
               ),
             ),
         WheelScreen.route: (ctx) => const WheelScreen(),
