@@ -11,9 +11,27 @@ const _preferencesFilename = 'preferences.json';
 class AppPreferences with ChangeNotifier {
   Color _backgroundColor;
   Color get backgroundColor => _backgroundColor;
-  set backgrondColor(Color value) {
+  set backgroundColor(Color value) {
     _backgroundColor = value;
     _save();
+  }
+
+  Color _wheelColorOdd;
+  Color get wheelColorOdd => _wheelColorOdd;
+  set wheelColorOdd(Color value) {
+    _wheelColorOdd = value;
+    _save();
+  }
+
+  Color _wheelColorEven;
+  Color get wheelColorEven => _wheelColorEven;
+  set wheelColorEven(Color value) {
+    _wheelColorEven = value;
+    _save();
+  }
+
+  Color wheelFillingColor(int index) {
+    return index.isOdd ? _wheelColorOdd : _wheelColorEven;
   }
 
   Questions _questions;
@@ -60,7 +78,7 @@ class AppPreferences with ChangeNotifier {
   /// Export the current preferences to a file
   Future<void> savePreferences(context) async {
     const encoder = JsonEncoder.withIndent('\t');
-    final text = encoder.convert(serialize(skipBinaryFiles: true));
+    final text = encoder.convert(serialize());
 
     await FilePickerInterface.instance.saveFile(
       context,
@@ -108,16 +126,28 @@ class AppPreferences with ChangeNotifier {
     // Call the real constructor
     final backgroundColor =
         Color(previousPreferences['backgroundColor'] ?? 0x00000000);
+    final wheelColorOdd =
+        Color(previousPreferences['wheelColorOdd'] ?? Colors.blue.value);
+    final wheelColorEven =
+        Color(previousPreferences['wheelColorEven'] ?? Colors.blue[800]!.value);
+
     final questions =
         Questions.fromSerialized(previousPreferences['questions'] ?? {});
     return AppPreferences._(
-        backgroundColor: backgroundColor, questions: questions);
+        backgroundColor: backgroundColor,
+        wheelColorOdd: wheelColorOdd,
+        wheelColorEven: wheelColorEven,
+        questions: questions);
   }
 
   AppPreferences._({
     required Color backgroundColor,
+    required Color wheelColorOdd,
+    required Color wheelColorEven,
     required Questions questions,
   })  : _backgroundColor = backgroundColor,
+        _wheelColorOdd = wheelColorOdd,
+        _wheelColorEven = wheelColorEven,
         _questions = questions;
 
   // INTERNAL METHODS
@@ -125,8 +155,10 @@ class AppPreferences with ChangeNotifier {
 
   ///
   /// Serialize all the values
-  Map<String, dynamic> serialize({bool skipBinaryFiles = false}) => {
+  Map<String, dynamic> serialize() => {
         'backgroundColor': _backgroundColor.value,
+        'wheelColorOdd': _wheelColorOdd.value,
+        'wheelColorEven': _wheelColorEven.value,
         'questions': _questions.serialize(),
       };
 
@@ -134,6 +166,8 @@ class AppPreferences with ChangeNotifier {
   /// Reset the app configuration to their original values
   void updateFromSerialized(map) async {
     _backgroundColor = Color(map['backgroundColor'] ?? 0x0000000);
+    _wheelColorOdd = Color(map['wheelColorOdd'] ?? Colors.blue.value);
+    _wheelColorEven = Color(map['wheelColorEven'] ?? Colors.blue[800]!.value);
     _questions = Questions.fromSerialized(map['questions'] ?? {});
   }
 }

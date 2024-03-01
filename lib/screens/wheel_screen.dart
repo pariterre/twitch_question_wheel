@@ -21,7 +21,7 @@ class WheelScreen extends StatefulWidget {
 class _WheelScreenState extends State<WheelScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   late TwitchManager? twitchManager =
-      ModalRoute.of(context)!.settings.arguments as TwitchManager;
+      ModalRoute.of(context)!.settings.arguments as TwitchManager?;
 
   StreamController<int> selected = StreamController<int>();
   final _spinDuration = const Duration(seconds: 3);
@@ -40,16 +40,7 @@ class _WheelScreenState extends State<WheelScreen> {
     if (message != '!spin') return;
     if (!_spinWheel(questions)) return;
 
-    twitchManager!.chat.send('Et ça toooourneee!!!');
-  }
-
-  Color _getFillColor(Color color, int index) {
-    final opacity = index % 2 == 0 ? 0.6 : 0.3;
-
-    return Color.alphaBlend(
-      color.withOpacity(opacity),
-      Colors.black,
-    );
+    twitchManager?.chat.send('Et ça toooourneee!!!');
   }
 
   bool _spinWheel(Questions questions) {
@@ -86,8 +77,8 @@ class _WheelScreenState extends State<WheelScreen> {
     setState(() {});
   }
 
-  Widget _buildWheel(
-      Questions questions, Color backgroundColor, double wheelSize) {
+  Widget _buildWheel(Questions questions, Color backgroundColor,
+      Color Function(int) getWheelColor, double wheelSize) {
     if (questions.notHasEnoughQuestions) {
       return const Center(child: Text('Svp ajouter des questions'));
     }
@@ -120,7 +111,7 @@ class _WheelScreenState extends State<WheelScreen> {
                           style: FortuneItemStyle(
                               borderColor: Colors.black,
                               borderWidth: 5,
-                              color: _getFillColor(Colors.blue, index)),
+                              color: getWheelColor(index)),
                           child: Text(
                             questions.categories[index].name,
                             maxLines: 1,
@@ -144,10 +135,10 @@ class _WheelScreenState extends State<WheelScreen> {
     final wheelSize = min(windowSize.height, windowSize.width) * 0.95;
 
     final questions = preferences.questions;
-    final wheel =
-        _buildWheel(questions, preferences.backgroundColor, wheelSize);
+    final wheel = _buildWheel(questions, preferences.backgroundColor,
+        preferences.wheelFillingColor, wheelSize);
 
-    twitchManager!.chat.onMessageReceived(
+    twitchManager?.chat.onMessageReceived(
         (sender, message) => _spinIfTwichAsks(sender, message, questions));
 
     return Scaffold(
