@@ -264,14 +264,6 @@ class MiniWheel extends StatelessWidget {
           decoration: BoxDecoration(
             color: preferences.wheelBorderColor,
             borderRadius: BorderRadius.circular(thumbnailRadius),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.5),
-                spreadRadius: 1,
-                blurRadius: 2,
-                offset: const Offset(0, 2),
-              ),
-            ],
           ),
           child: Align(
             alignment: Alignment.center,

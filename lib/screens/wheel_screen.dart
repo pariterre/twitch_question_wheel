@@ -99,14 +99,6 @@ class _WheelScreenState extends State<WheelScreen> {
                 shape: BoxShape.circle,
                 border:
                     Border.all(color: preferences.wheelBorderColor, width: 20),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.grey,
-                    spreadRadius: 8,
-                    blurRadius: 10,
-                    offset: Offset(0, 0),
-                  ),
-                ],
               ),
               child: FortuneWheel(
                 indicators: const [
