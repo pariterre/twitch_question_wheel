@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:pomodoro_wheel/providers/app_preferences.dart';
 import 'package:pomodoro_wheel/screens/edit_question_dialog.dart';
 import 'package:pomodoro_wheel/widgets/custom_hue_ring_picker.dart';
@@ -54,21 +55,7 @@ class MyDrawer extends StatelessWidget {
   ListTile _wheelThemeColorTileBuild(BuildContext context) {
     return ListTile(
       title: const Text('Couleur de la roue'),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 25,
-            height: 50,
-            color: AppPreferences.of(context).wheelFillingColor(1),
-          ),
-          Container(
-            width: 25,
-            height: 50,
-            color: AppPreferences.of(context).wheelFillingColor(2),
-          ),
-        ],
-      ),
+      trailing: const MiniWheel(thumbnailRadius: 25),
       onTap: () => _onTapPickWheelThemeColor(context),
     );
   }
@@ -132,71 +119,88 @@ class MyDrawer extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Première couleur',
-                          style: Theme.of(context).textTheme.titleLarge),
-                      const SizedBox(height: 12),
-                      CustomHueRingPicker(
-                        pickerColor: preferences.wheelColorOdd,
-                        onColorChanged: (color) =>
-                            preferences.wheelColorOdd = color,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(width: 20),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Seconde couleur',
-                          style: Theme.of(context).textTheme.titleLarge),
-                      const SizedBox(height: 12),
-                      CustomHueRingPicker(
-                        pickerColor: preferences.wheelColorEven,
-                        onColorChanged: (color) =>
-                            preferences.wheelColorEven = color,
-                      ),
-                    ],
-                  )
-                ],
+              SingleChildScrollView(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Première moitiée',
+                            style: Theme.of(context).textTheme.titleLarge),
+                        const SizedBox(height: 12),
+                        CustomHueRingPicker(
+                          pickerColor: preferences.wheelColorOdd,
+                          colorPickerHeight: 200,
+                          onColorChanged: (color) =>
+                              preferences.wheelColorOdd = color,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: 20),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Seconde moitiée',
+                            style: Theme.of(context).textTheme.titleLarge),
+                        const SizedBox(height: 12),
+                        CustomHueRingPicker(
+                          pickerColor: preferences.wheelColorEven,
+                          colorPickerHeight: 200,
+                          onColorChanged: (color) =>
+                              preferences.wheelColorEven = color,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: 20),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Question',
+                            style: Theme.of(context).textTheme.titleLarge),
+                        const SizedBox(height: 12),
+                        CustomHueRingPicker(
+                          pickerColor: preferences.wheelQuestionColor,
+                          colorPickerHeight: 200,
+                          onColorChanged: (color) =>
+                              preferences.wheelQuestionColor = color,
+                          enableAlpha: true,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: 20),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Bordure',
+                            style: Theme.of(context).textTheme.titleLarge),
+                        const SizedBox(height: 12),
+                        CustomHueRingPicker(
+                          pickerColor: preferences.wheelBorderColor,
+                          colorPickerHeight: 200,
+                          onColorChanged: (color) =>
+                              preferences.wheelBorderColor = color,
+                          enableAlpha: true,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 20),
               Center(
-                child: Column(
+                child: Stack(
+                  alignment: Alignment.center,
                   children: [
-                    Text('Résultat',
-                        style: Theme.of(context).textTheme.titleLarge),
-                    const SizedBox(height: 12),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
+                    Column(
                       children: [
-                        Container(
-                            width: thumbnailRadius,
-                            height: 2 * thumbnailRadius,
-                            decoration: BoxDecoration(
-                              color: AppPreferences.of(context)
-                                  .wheelFillingColor(1),
-                              borderRadius: const BorderRadius.only(
-                                  topLeft: Radius.circular(thumbnailRadius),
-                                  bottomLeft: Radius.circular(thumbnailRadius)),
-                            )),
-                        Container(
-                          width: thumbnailRadius,
-                          height: 2 * thumbnailRadius,
-                          decoration: BoxDecoration(
-                            color:
-                                AppPreferences.of(context).wheelFillingColor(2),
-                            borderRadius: const BorderRadius.only(
-                                topRight: Radius.circular(thumbnailRadius),
-                                bottomRight: Radius.circular(thumbnailRadius)),
-                          ),
-                        ),
+                        Text('Résultat',
+                            style: Theme.of(context).textTheme.titleLarge),
+                        const SizedBox(height: 12),
+                        const MiniWheel(thumbnailRadius: thumbnailRadius)
                       ],
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -235,5 +239,78 @@ class MyDrawer extends StatelessWidget {
     final navigator = Navigator.of(context);
     await preferences.loadPreferences(context);
     navigator.pop();
+  }
+}
+
+class MiniWheel extends StatelessWidget {
+  const MiniWheel({
+    super.key,
+    required this.thumbnailRadius,
+  });
+
+  final double thumbnailRadius;
+  final borderRadiusFactor = 0.9;
+
+  @override
+  Widget build(BuildContext context) {
+    final preferences = AppPreferences.of(context);
+
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Container(
+          width: 2 * thumbnailRadius,
+          height: 2 * thumbnailRadius,
+          decoration: BoxDecoration(
+            color: preferences.wheelBorderColor,
+            borderRadius: BorderRadius.circular(thumbnailRadius),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.5),
+                spreadRadius: 1,
+                blurRadius: 2,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Align(
+            alignment: Alignment.center,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                    width: thumbnailRadius * borderRadiusFactor,
+                    height: 2 * thumbnailRadius * borderRadiusFactor,
+                    decoration: BoxDecoration(
+                      color: preferences.wheelFillingColor(1),
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(
+                              thumbnailRadius * borderRadiusFactor),
+                          bottomLeft: Radius.circular(
+                              thumbnailRadius * borderRadiusFactor)),
+                    )),
+                Container(
+                  width: thumbnailRadius * borderRadiusFactor,
+                  height: 2 * thumbnailRadius * borderRadiusFactor,
+                  decoration: BoxDecoration(
+                    color: preferences.wheelFillingColor(2),
+                    borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(
+                            thumbnailRadius * borderRadiusFactor),
+                        bottomRight: Radius.circular(
+                            thumbnailRadius * borderRadiusFactor)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Container(
+          width: thumbnailRadius * 2.3,
+          height: thumbnailRadius / 2,
+          decoration: BoxDecoration(color: preferences.wheelQuestionColor),
+        )
+      ],
+    );
   }
 }

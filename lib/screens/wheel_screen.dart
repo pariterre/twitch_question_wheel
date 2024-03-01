@@ -77,8 +77,9 @@ class _WheelScreenState extends State<WheelScreen> {
     setState(() {});
   }
 
-  Widget _buildWheel(Questions questions, Color backgroundColor,
-      Color Function(int) getWheelColor, double wheelSize) {
+  Widget _buildWheel(Questions questions, double wheelSize) {
+    final preferences = AppPreferences.of(context);
+
     if (questions.notHasEnoughQuestions) {
       return const Center(child: Text('Svp ajouter des questions'));
     }
@@ -89,11 +90,24 @@ class _WheelScreenState extends State<WheelScreen> {
       child: RotatedBox(
         quarterTurns: 1,
         child: Container(
-          decoration: BoxDecoration(color: backgroundColor),
+          decoration: BoxDecoration(color: preferences.backgroundColor),
           child: Center(
-            child: SizedBox(
+            child: Container(
               height: wheelSize,
               width: wheelSize,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border:
+                    Border.all(color: preferences.wheelBorderColor, width: 20),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.grey,
+                    spreadRadius: 8,
+                    blurRadius: 10,
+                    offset: Offset(0, 0),
+                  ),
+                ],
+              ),
               child: FortuneWheel(
                 indicators: const [
                   FortuneIndicator(
@@ -109,9 +123,9 @@ class _WheelScreenState extends State<WheelScreen> {
                     .keys
                     .map<FortuneItem>((index) => FortuneItem(
                           style: FortuneItemStyle(
-                              borderColor: Colors.black,
-                              borderWidth: 5,
-                              color: getWheelColor(index)),
+                              borderColor: Colors.grey[900]!,
+                              borderWidth: 2,
+                              color: preferences.wheelFillingColor(index)),
                           child: Text(
                             questions.categories[index].name,
                             maxLines: 1,
@@ -135,8 +149,7 @@ class _WheelScreenState extends State<WheelScreen> {
     final wheelSize = min(windowSize.height, windowSize.width) * 0.95;
 
     final questions = preferences.questions;
-    final wheel = _buildWheel(questions, preferences.backgroundColor,
-        preferences.wheelFillingColor, wheelSize);
+    final wheel = _buildWheel(questions, wheelSize);
 
     twitchManager?.chat.onMessageReceived(
         (sender, message) => _spinIfTwichAsks(sender, message, questions));
@@ -153,7 +166,8 @@ class _WheelScreenState extends State<WheelScreen> {
               Positioned(
                 bottom: wheelSize / 2,
                 child: Container(
-                  decoration: BoxDecoration(color: Colors.blue.withAlpha(250)),
+                  decoration:
+                      BoxDecoration(color: preferences.wheelQuestionColor),
                   width: wheelSize * 6 / 5,
                   height: wheelSize / 5,
                   child: Center(
