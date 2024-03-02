@@ -10,8 +10,9 @@ import 'package:pomodoro_wheel/widgets/my_drawer.dart';
 import 'package:twitch_manager/twitch_manager.dart';
 
 class WheelScreen extends StatefulWidget {
-  const WheelScreen({super.key});
+  const WheelScreen({super.key, required this.useMock});
 
+  final bool useMock;
   static const route = "/wheel-screen";
 
   @override
@@ -35,7 +36,7 @@ class _WheelScreenState extends State<WheelScreen> {
         barrierDismissible: false,
         context: context,
         builder: (context) => TwitchAuthenticationScreen(
-              isMockActive: true,
+              isMockActive: widget.useMock,
               onFinishedConnexion: (twitchManager) =>
                   Navigator.of(context).pop(twitchManager),
               appInfo: TwitchAppInfo(

@@ -17,6 +17,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: WheelScreen());
+    return const MaterialApp(home: WheelScreen(useMock: false));
   }
 }
