@@ -20,8 +20,55 @@ class WheelScreen extends StatefulWidget {
 
 class _WheelScreenState extends State<WheelScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  late TwitchManager? twitchManager =
-      ModalRoute.of(context)!.settings.arguments as TwitchManager?;
+  TwitchManager? twitchManager;
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => _getTwitchManagerDialog());
+  }
+
+  Future<void> _getTwitchManagerDialog() async {
+    twitchManager = await showDialog<TwitchManager?>(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) => TwitchAuthenticationScreen(
+              isMockActive: true,
+              onFinishedConnexion: (twitchManager) =>
+                  Navigator.of(context).pop(twitchManager),
+              appInfo: TwitchAppInfo(
+                appName: 'QuestionWheel',
+                twitchAppId: 'bobffcezcrakzkqv62h78i04vxkx72',
+                redirectDomain: 'twitchauthentication.pariterre.net',
+                scope: [
+                  TwitchScope.chatRead,
+                  TwitchScope.chatEdit,
+                  TwitchScope.chatters,
+                  TwitchScope.readFollowers,
+                  TwitchScope.readModerator,
+                ],
+              ),
+              debugPanelOptions: TwitchDebugPanelOptions(
+                chatters: [
+                  TwitchChatterMock(displayName: 'Streamer', isModerator: true),
+                  TwitchChatterMock(
+                      displayName: 'Moderator 1', isModerator: true),
+                  TwitchChatterMock(displayName: 'Viewer 1'),
+                ],
+                chatMessages: const ['!spin'],
+              ),
+            ));
+
+    setState(() {});
+    if (!mounted) return;
+    if (twitchManager == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text(
+              'Connexion à Twitch échouée, vous pouvez continuer sans Twitch')));
+    }
+  }
 
   StreamController<int> selected = StreamController<int>();
   final _spinDuration = const Duration(seconds: 3);
@@ -56,7 +103,9 @@ class _WheelScreenState extends State<WheelScreen> {
         questions.categories[nextCategoryIndex].pickNextQuestion();
 
     selected.add(nextCategoryIndex);
-    Future.delayed(_spinDuration, () => _askQuestion(nextQuestion));
+    Future.delayed(_spinDuration, () {
+      _askQuestion(nextQuestion);
+    });
     setState(() {});
     return true;
   }
