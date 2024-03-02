@@ -20,7 +20,7 @@ class WheelScreen extends StatefulWidget {
 
 class _WheelScreenState extends State<WheelScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  TwitchManager? twitchManager;
+  TwitchManager? _twitchManager;
 
   @override
   void initState() {
@@ -31,7 +31,7 @@ class _WheelScreenState extends State<WheelScreen> {
   }
 
   Future<void> _getTwitchManagerDialog() async {
-    twitchManager = await showDialog<TwitchManager?>(
+    _twitchManager = await showDialog<TwitchManager?>(
         barrierDismissible: false,
         context: context,
         builder: (context) => TwitchAuthenticationScreen(
@@ -63,15 +63,15 @@ class _WheelScreenState extends State<WheelScreen> {
 
     setState(() {});
     if (!mounted) return;
-    if (twitchManager == null) {
+    if (_twitchManager == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text(
-              'Connexion à Twitch échouée, vous pouvez continuer sans Twitch')));
+              'Connexion à Twitch échouée, veuillez réessayer plus tard.')));
     }
   }
 
-  StreamController<int> selected = StreamController<int>();
-  final _spinDuration = const Duration(seconds: 3);
+  final _selected = StreamController<int>();
+  final _spinDuration = const Duration(seconds: 4);
   DateTime _spinStartingTime = DateTime.now();
 
   String? _currentQuestion;
@@ -79,7 +79,7 @@ class _WheelScreenState extends State<WheelScreen> {
 
   @override
   void dispose() {
-    selected.close();
+    _selected.close();
     super.dispose();
   }
 
@@ -87,7 +87,7 @@ class _WheelScreenState extends State<WheelScreen> {
     if (message != '!spin') return;
     if (!_spinWheel(questions)) return;
 
-    twitchManager?.chat.send('Et ça toooourneee!!!');
+    _twitchManager?.chat.send('Et ça toooourneee!!!');
   }
 
   bool _spinWheel(Questions questions) {
@@ -102,7 +102,7 @@ class _WheelScreenState extends State<WheelScreen> {
     final nextQuestion =
         questions.categories[nextCategoryIndex].pickNextQuestion();
 
-    selected.add(nextCategoryIndex);
+    _selected.add(nextCategoryIndex);
     Future.delayed(_spinDuration, () {
       _askQuestion(nextQuestion);
     });
@@ -114,7 +114,7 @@ class _WheelScreenState extends State<WheelScreen> {
     if (!mounted) return;
 
     _currentQuestion = nextQuestion;
-    twitchManager!.chat.send(_currentQuestion!);
+    _twitchManager!.chat.send(_currentQuestion!);
     Future.delayed(_questionDuration, _removeQuestion);
     setState(() {});
   }
@@ -128,6 +128,10 @@ class _WheelScreenState extends State<WheelScreen> {
 
   Widget _buildWheel(Questions questions, double wheelSize) {
     final preferences = AppPreferences.of(context);
+
+    if (_twitchManager == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
     if (questions.notHasEnoughQuestions) {
       return const Center(child: Text('Svp ajouter des questions'));
@@ -156,7 +160,7 @@ class _WheelScreenState extends State<WheelScreen> {
                       child: TriangleIndicator(color: Colors.red))
                 ],
                 duration: _spinDuration,
-                selected: selected.stream,
+                selected: _selected.stream,
                 rotationCount: _spinDuration.inSeconds * 2,
                 animateFirst: false,
                 items: questions.categories
@@ -192,13 +196,13 @@ class _WheelScreenState extends State<WheelScreen> {
     final questions = preferences.questions;
     final wheel = _buildWheel(questions, wheelSize);
 
-    twitchManager?.chat.onMessageReceived(
+    _twitchManager?.chat.onMessageReceived(
         (sender, message) => _spinIfTwichAsks(sender, message, questions));
 
     return Scaffold(
       key: _scaffoldKey,
       body: TwitchDebugOverlay(
-        manager: twitchManager,
+        manager: _twitchManager,
         child: Stack(
           alignment: Alignment.center,
           children: [
@@ -244,7 +248,7 @@ class _WheelScreenState extends State<WheelScreen> {
           ],
         ),
       ),
-      drawer: MyDrawer(twitchManager: twitchManager),
+      drawer: MyDrawer(twitchManager: _twitchManager),
     );
   }
 }
