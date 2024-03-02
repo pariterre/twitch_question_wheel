@@ -1,11 +1,11 @@
 {
-    "name": "question_wheel",
-    "short_name": "question_wheel",
+    "name": "Roue de la question",
+    "short_name": "Roue de la question",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Ouvrez-vous à vos specteurs et spectatrices en leur permettant de poser des questions au hasard.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

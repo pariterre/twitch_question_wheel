@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:pomodoro_wheel/providers/app_preferences.dart';
 import 'package:pomodoro_wheel/screens/edit_question_dialog.dart';
 import 'package:pomodoro_wheel/widgets/custom_hue_ring_picker.dart';

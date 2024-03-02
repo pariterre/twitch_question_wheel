@@ -1,5 +1,5 @@
 name: pomodoro_wheel
-description: A new Flutter project.
+description: Ouvrez-vous à vos specteurs et spectatrices en leur permettant de poser des questions au hasard.
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -66,5 +66,5 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
   uses-material-design: true
-  assets:
-    - assets/
+  # assets:
+  #   - assets/
