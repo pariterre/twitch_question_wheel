@@ -71,7 +71,8 @@ class _WheelScreenState extends State<WheelScreen> {
               'Connexion à Twitch échouée, veuillez réessayer plus tard.')));
       return;
     }
-    _twitchManager!.registerToOnDisconnect(() => WidgetsBinding.instance
+    _twitchManager!.onHasDisconnected.startListening(() => WidgetsBinding
+        .instance
         .addPostFrameCallback((_) => _getTwitchManagerDialog()));
     setState(() {});
   }
