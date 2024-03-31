@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pomodoro_wheel/models/questions.dart';
-import 'package:pomodoro_wheel/providers/app_preferences.dart';
+import 'package:twitch_question_wheel/models/questions.dart';
+import 'package:twitch_question_wheel/providers/app_preferences.dart';
 
 class EditQuestionDialog extends StatelessWidget {
   const EditQuestionDialog({super.key});

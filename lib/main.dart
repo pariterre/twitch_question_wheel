@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pomodoro_wheel/providers/app_preferences.dart';
-import 'package:pomodoro_wheel/screens/wheel_screen.dart';
+import 'package:twitch_question_wheel/providers/app_preferences.dart';
+import 'package:twitch_question_wheel/screens/wheel_screen.dart';
 import 'package:provider/provider.dart';
 
 void main() async {

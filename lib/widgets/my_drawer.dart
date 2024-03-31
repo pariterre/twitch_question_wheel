@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:pomodoro_wheel/providers/app_preferences.dart';
-import 'package:pomodoro_wheel/screens/edit_question_dialog.dart';
-import 'package:pomodoro_wheel/widgets/custom_hue_ring_picker.dart';
 import 'package:twitch_manager/twitch_manager.dart';
+import 'package:twitch_question_wheel/providers/app_preferences.dart';
+import 'package:twitch_question_wheel/screens/edit_question_dialog.dart';
+import 'package:twitch_question_wheel/widgets/custom_hue_ring_picker.dart';
 
 class MyDrawer extends StatelessWidget {
   const MyDrawer({super.key, required this.twitchManager});

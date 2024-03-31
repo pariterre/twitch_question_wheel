@@ -1,10 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:pomodoro_wheel/models/file_picker_interface.dart';
-import 'package:pomodoro_wheel/models/questions.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:twitch_question_wheel/models/file_picker_interface.dart';
+import 'package:twitch_question_wheel/models/questions.dart';
 
 const _preferencesFilename = 'preferences.json';
 

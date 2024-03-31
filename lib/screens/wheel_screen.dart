@@ -4,10 +4,10 @@ import 'dart:math';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_fortune_wheel/flutter_fortune_wheel.dart';
-import 'package:pomodoro_wheel/models/questions.dart';
-import 'package:pomodoro_wheel/providers/app_preferences.dart';
-import 'package:pomodoro_wheel/widgets/my_drawer.dart';
 import 'package:twitch_manager/twitch_manager.dart';
+import 'package:twitch_question_wheel/models/questions.dart';
+import 'package:twitch_question_wheel/providers/app_preferences.dart';
+import 'package:twitch_question_wheel/widgets/my_drawer.dart';
 
 class WheelScreen extends StatefulWidget {
   const WheelScreen({super.key, required this.useMock});
