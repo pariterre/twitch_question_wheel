@@ -29,9 +29,10 @@ class MyDrawer extends StatelessWidget {
           ListTile(
             title: const Text('Déconnexion de Twitch'),
             onTap: () async {
-              final navigator = Navigator.of(context);
               await twitchManager!.disconnect();
-              navigator.pushReplacementNamed(TwitchAuthenticationScreen.route);
+
+              if (!context.mounted) return;
+              Navigator.of(context).pop();
             },
           ),
         ],

@@ -27,22 +27,24 @@ class _WheelScreenState extends State<WheelScreen> {
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance
-        .addPostFrameCallback((_) => _getTwitchManagerDialog());
+    if (_twitchManager == null || !_twitchManager!.isConnected) {
+      WidgetsBinding.instance
+          .addPostFrameCallback((_) => _getTwitchManagerDialog());
+    }
   }
 
   Future<void> _getTwitchManagerDialog() async {
     _twitchManager = await showDialog<TwitchManager?>(
         barrierDismissible: false,
         context: context,
-        builder: (context) => TwitchAuthenticationScreen(
+        builder: (context) => TwitchAuthenticationDialog(
               isMockActive: widget.useMock,
-              onFinishedConnexion: (twitchManager) =>
+              onConnexionEstablished: (twitchManager) =>
                   Navigator.of(context).pop(twitchManager),
               appInfo: TwitchAppInfo(
                 appName: 'QuestionWheel',
                 twitchAppId: 'bobffcezcrakzkqv62h78i04vxkx72',
-                redirectDomain: 'twitchauthentication.pariterre.net',
+                redirectUri: 'twitchauthentication.pariterre.net',
                 scope: [
                   TwitchScope.chatRead,
                   TwitchScope.chatEdit,
@@ -61,14 +63,17 @@ class _WheelScreenState extends State<WheelScreen> {
                 chatMessages: const ['!spin'],
               ),
             ));
-
-    setState(() {});
     if (!mounted) return;
+
     if (_twitchManager == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text(
               'Connexion à Twitch échouée, veuillez réessayer plus tard.')));
+      return;
     }
+    _twitchManager!.registerToOnDisconnect(() => WidgetsBinding.instance
+        .addPostFrameCallback((_) => _getTwitchManagerDialog()));
+    setState(() {});
   }
 
   final _selected = StreamController<int>();
