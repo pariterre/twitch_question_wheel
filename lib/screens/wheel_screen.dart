@@ -203,7 +203,7 @@ class _WheelScreenState extends State<WheelScreen> {
     final questions = preferences.questions;
     final wheel = _buildWheel(questions, wheelSize);
 
-    _twitchManager?.chat.onMessageReceived(
+    _twitchManager?.chat.onMessageReceived.startListening(
         (sender, message) => _spinIfTwichAsks(sender, message, questions));
 
     return Scaffold(
