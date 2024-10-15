@@ -4,7 +4,7 @@ import 'dart:math';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_fortune_wheel/flutter_fortune_wheel.dart';
-import 'package:twitch_manager/twitch_manager.dart';
+import 'package:twitch_manager/twitch_app.dart';
 import 'package:twitch_question_wheel/models/questions.dart';
 import 'package:twitch_question_wheel/providers/app_preferences.dart';
 import 'package:twitch_question_wheel/widgets/my_drawer.dart';
@@ -21,7 +21,7 @@ class WheelScreen extends StatefulWidget {
 
 class _WheelScreenState extends State<WheelScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  TwitchManager? _twitchManager;
+  TwitchAppManager? _twitchManager;
 
   @override
   void initState() {
@@ -34,23 +34,27 @@ class _WheelScreenState extends State<WheelScreen> {
   }
 
   Future<void> _getTwitchManagerDialog() async {
-    _twitchManager = await showDialog<TwitchManager?>(
+    _twitchManager = await showDialog<TwitchAppManager?>(
         barrierDismissible: false,
         context: context,
-        builder: (context) => TwitchAuthenticationDialog(
+        builder: (context) => TwitchAppAuthenticationDialog(
               isMockActive: widget.useMock,
               onConnexionEstablished: (twitchManager) =>
                   Navigator.of(context).pop(twitchManager),
               appInfo: TwitchAppInfo(
                 appName: 'QuestionWheel',
-                twitchAppId: 'bobffcezcrakzkqv62h78i04vxkx72',
-                redirectUri: 'twitchauthentication.pariterre.net',
+                twitchClientId: 'bobffcezcrakzkqv62h78i04vxkx72',
+                twitchRedirectUri: Uri.https(
+                    'twitchauthentication.pariterre.net',
+                    'twitch_redirect.html'),
+                authenticationServerUri:
+                    Uri.https('twitchserver.pariterre.net:3000', 'token'),
                 scope: [
-                  TwitchScope.chatRead,
-                  TwitchScope.chatEdit,
-                  TwitchScope.chatters,
-                  TwitchScope.readFollowers,
-                  TwitchScope.readModerator,
+                  TwitchAppScope.chatRead,
+                  TwitchAppScope.chatEdit,
+                  TwitchAppScope.chatters,
+                  TwitchAppScope.readFollowers,
+                  TwitchAppScope.readModerator,
                 ],
               ),
               debugPanelOptions: TwitchDebugPanelOptions(
@@ -71,8 +75,7 @@ class _WheelScreenState extends State<WheelScreen> {
               'Connexion à Twitch échouée, veuillez réessayer plus tard.')));
       return;
     }
-    _twitchManager!.onHasDisconnected.startListening(() => WidgetsBinding
-        .instance
+    _twitchManager!.onHasDisconnected.listen(() => WidgetsBinding.instance
         .addPostFrameCallback((_) => _getTwitchManagerDialog()));
     setState(() {});
   }
@@ -203,12 +206,12 @@ class _WheelScreenState extends State<WheelScreen> {
     final questions = preferences.questions;
     final wheel = _buildWheel(questions, wheelSize);
 
-    _twitchManager?.chat.onMessageReceived.startListening(
+    _twitchManager?.chat.onMessageReceived.listen(
         (sender, message) => _spinIfTwichAsks(sender, message, questions));
 
     return Scaffold(
       key: _scaffoldKey,
-      body: TwitchDebugOverlay(
+      body: TwitchAppDebugOverlay(
         manager: _twitchManager,
         child: Stack(
           alignment: Alignment.center,
