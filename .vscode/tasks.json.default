@@ -1,0 +1,21 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build Main release",
+      "type": "shell",
+      "command": "make",
+      "args": [ "wheel" ],
+      "problemMatcher": [ ],
+      "isBackground": false,
+      "options": {
+        "env": {
+          "WHEEL_SSH_USER": "USER_FOR_SSH_SERVICE",
+          "WHEEL_SSH_SERVER": "SERVER_URL",
+          "WHEEL_SSH_FOLDER_MAIN": "FOLDER_IN_SERVER"
+        }
+      }
+    },
+  ]
+}
+  

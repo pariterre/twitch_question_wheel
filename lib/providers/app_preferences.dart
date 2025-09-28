@@ -140,14 +140,14 @@ class AppPreferences with ChangeNotifier {
     // Call the real constructor
     final backgroundColor =
         Color(previousPreferences['backgroundColor'] ?? 0x00000000);
-    final wheelBorderColor = Color(
-        previousPreferences['wheelBorderColor'] ?? Colors.grey[700]!.value);
+    final wheelBorderColor = Color(previousPreferences['wheelBorderColor'] ??
+        Colors.grey[700]!.toARGB32());
     final wheelColorOdd =
-        Color(previousPreferences['wheelColorOdd'] ?? Colors.blue.value);
-    final wheelColorEven =
-        Color(previousPreferences['wheelColorEven'] ?? Colors.blue[800]!.value);
-    final wheelQuestionColor =
-        Color(previousPreferences['wheelQuestionColor'] ?? Colors.blue.value);
+        Color(previousPreferences['wheelColorOdd'] ?? Colors.blue.toARGB32());
+    final wheelColorEven = Color(
+        previousPreferences['wheelColorEven'] ?? Colors.blue[800]!.toARGB32());
+    final wheelQuestionColor = Color(
+        previousPreferences['wheelQuestionColor'] ?? Colors.blue.toARGB32());
 
     final questions =
         Questions.fromSerialized(previousPreferences['questions'] ?? {});
@@ -180,11 +180,11 @@ class AppPreferences with ChangeNotifier {
   ///
   /// Serialize all the values
   Map<String, dynamic> serialize() => {
-        'backgroundColor': _backgroundColor.value,
-        'wheelBorderColor': _wheelBorderColor.value,
-        'wheelColorOdd': _wheelColorOdd.value,
-        'wheelColorEven': _wheelColorEven.value,
-        'wheelQuestionColor': _wheelQuestionColor.value,
+        'backgroundColor': _backgroundColor.toARGB32(),
+        'wheelBorderColor': _wheelBorderColor.toARGB32(),
+        'wheelColorOdd': _wheelColorOdd.toARGB32(),
+        'wheelColorEven': _wheelColorEven.toARGB32(),
+        'wheelQuestionColor': _wheelQuestionColor.toARGB32(),
         'questions': _questions.serialize(),
       };
 
@@ -193,10 +193,12 @@ class AppPreferences with ChangeNotifier {
   void updateFromSerialized(map) async {
     _backgroundColor = Color(map['backgroundColor'] ?? 0x0000000);
     _wheelBorderColor =
-        Color(map['wheelBorderColor'] ?? Colors.grey[700]!.value);
-    _wheelColorOdd = Color(map['wheelColorOdd'] ?? Colors.blue.value);
-    _wheelColorEven = Color(map['wheelColorEven'] ?? Colors.blue[800]!.value);
-    _wheelQuestionColor = Color(map['wheelQuestionColor'] ?? Colors.blue.value);
+        Color(map['wheelBorderColor'] ?? Colors.grey[700]!.toARGB32());
+    _wheelColorOdd = Color(map['wheelColorOdd'] ?? Colors.blue.toARGB32());
+    _wheelColorEven =
+        Color(map['wheelColorEven'] ?? Colors.blue[800]!.toARGB32());
+    _wheelQuestionColor =
+        Color(map['wheelQuestionColor'] ?? Colors.blue.toARGB32());
     _questions = Questions.fromSerialized(map['questions'] ?? {});
   }
 }

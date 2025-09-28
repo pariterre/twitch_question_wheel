@@ -15,8 +15,11 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  final useTwitchMock =
+      const bool.fromEnvironment('USE_TWITCH_MOCK', defaultValue: false);
+
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: WheelScreen(useMock: false));
+    return MaterialApp(home: WheelScreen(useMock: useTwitchMock));
   }
 }

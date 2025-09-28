@@ -46,3 +46,5 @@ app.*.map.json
 assets/credentials.json
 
 oauth.json
+.vscode/tasks.json
+release/

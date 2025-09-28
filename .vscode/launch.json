@@ -8,7 +8,13 @@
             "name": "Question wheel",
             "request": "launch",
             "type": "dart",
-            "args": ["--web-browser-flag=--disable-web-security"]
-        }
+            "args": [ "--dart-define=USE_TWITCH_MOCK=false", ]
+        },
+        {
+            "name": "Release Main",
+            "type": "dart",
+            "request": "launch",
+            "preLaunchTask": "Build Main release",
+        },
     ]
 }
