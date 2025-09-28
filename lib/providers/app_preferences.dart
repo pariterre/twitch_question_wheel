@@ -30,10 +30,31 @@ class AppPreferences with ChangeNotifier {
     _save();
   }
 
+  Color _wheelTextColorOdd;
+  Color get wheelTextColorOdd => _wheelTextColorOdd;
+  set wheelTextColorOdd(Color value) {
+    _wheelTextColorOdd = value;
+    _save();
+  }
+
   Color _wheelColorEven;
   Color get wheelColorEven => _wheelColorEven;
   set wheelColorEven(Color value) {
     _wheelColorEven = value;
+    _save();
+  }
+
+  Color _wheelTextColorEven;
+  Color get wheelTextColorEven => _wheelTextColorEven;
+  set wheelTextColorEven(Color value) {
+    _wheelTextColorEven = value;
+    _save();
+  }
+
+  Color _wheelColorMarker;
+  Color get wheelColorMarker => _wheelColorMarker;
+  set wheelColorMarker(Color value) {
+    _wheelColorMarker = value;
     _save();
   }
 
@@ -44,8 +65,26 @@ class AppPreferences with ChangeNotifier {
     _save();
   }
 
+  Color _wheelQuestionTextColor;
+  Color get wheelQuestionTextColor => _wheelQuestionTextColor;
+  set wheelQuestionTextColor(Color value) {
+    _wheelQuestionTextColor = value;
+    _save();
+  }
+
+  Color _wheelQuestionBorderColor;
+  Color get wheelQuestionBorderColor => _wheelQuestionBorderColor;
+  set wheelQuestionBorderColor(Color value) {
+    _wheelQuestionBorderColor = value;
+    _save();
+  }
+
   Color wheelFillingColor(int index) {
     return index.isOdd ? _wheelColorOdd : _wheelColorEven;
+  }
+
+  Color wheelTextColor(int index) {
+    return index.isOdd ? _wheelTextColorOdd : _wheelTextColorEven;
   }
 
   Questions _questions;
@@ -144,10 +183,22 @@ class AppPreferences with ChangeNotifier {
         Colors.grey[700]!.toARGB32());
     final wheelColorOdd =
         Color(previousPreferences['wheelColorOdd'] ?? Colors.blue.toARGB32());
+    final wheelTextColorOdd = Color(
+        previousPreferences['wheelTextColorOdd'] ?? Colors.black.toARGB32());
     final wheelColorEven = Color(
         previousPreferences['wheelColorEven'] ?? Colors.blue[800]!.toARGB32());
+    final wheelTextColorEven = Color(
+        previousPreferences['wheelTextColorEven'] ?? Colors.black.toARGB32());
+    final wheelColorMarker =
+        Color(previousPreferences['wheelColorMarker'] ?? Colors.red.toARGB32());
     final wheelQuestionColor = Color(
         previousPreferences['wheelQuestionColor'] ?? Colors.blue.toARGB32());
+    final wheelQuestionTextColor = Color(
+        previousPreferences['wheelQuestionTextColor'] ??
+            Colors.white.toARGB32());
+    final wheelQuestionBorderColor = Color(
+        previousPreferences['wheelQuestionBorderColor'] ??
+            Colors.grey[700]!.toARGB32());
 
     final questions =
         Questions.fromSerialized(previousPreferences['questions'] ?? {});
@@ -155,8 +206,13 @@ class AppPreferences with ChangeNotifier {
         backgroundColor: backgroundColor,
         wheelBorderColor: wheelBorderColor,
         wheelColorOdd: wheelColorOdd,
+        wheelTextColorOdd: wheelTextColorOdd,
         wheelColorEven: wheelColorEven,
+        wheelTextColorEven: wheelTextColorEven,
+        wheelColorMarker: wheelColorMarker,
         wheelQuestionColor: wheelQuestionColor,
+        wheelQuestionTextColor: wheelQuestionTextColor,
+        wheelQuestionBorderColor: wheelQuestionBorderColor,
         questions: questions);
   }
 
@@ -164,14 +220,24 @@ class AppPreferences with ChangeNotifier {
     required Color backgroundColor,
     required Color wheelBorderColor,
     required Color wheelColorOdd,
+    required Color wheelTextColorOdd,
     required Color wheelColorEven,
+    required Color wheelTextColorEven,
+    required Color wheelColorMarker,
     required Color wheelQuestionColor,
+    required Color wheelQuestionTextColor,
+    required Color wheelQuestionBorderColor,
     required Questions questions,
   })  : _backgroundColor = backgroundColor,
         _wheelBorderColor = wheelBorderColor,
         _wheelColorOdd = wheelColorOdd,
+        _wheelTextColorOdd = wheelTextColorOdd,
         _wheelColorEven = wheelColorEven,
+        _wheelTextColorEven = wheelTextColorEven,
+        _wheelColorMarker = wheelColorMarker,
         _wheelQuestionColor = wheelQuestionColor,
+        _wheelQuestionTextColor = wheelQuestionTextColor,
+        _wheelQuestionBorderColor = wheelQuestionBorderColor,
         _questions = questions;
 
   // INTERNAL METHODS
@@ -183,8 +249,13 @@ class AppPreferences with ChangeNotifier {
         'backgroundColor': _backgroundColor.toARGB32(),
         'wheelBorderColor': _wheelBorderColor.toARGB32(),
         'wheelColorOdd': _wheelColorOdd.toARGB32(),
+        'wheelTextColorOdd': _wheelTextColorOdd.toARGB32(),
         'wheelColorEven': _wheelColorEven.toARGB32(),
+        'wheelTextColorEven': _wheelTextColorEven.toARGB32(),
+        'wheelColorMarker': _wheelColorMarker.toARGB32(),
         'wheelQuestionColor': _wheelQuestionColor.toARGB32(),
+        'wheelQuestionTextColor': _wheelQuestionTextColor.toARGB32(),
+        'wheelQuestionBorderColor': _wheelQuestionBorderColor.toARGB32(),
         'questions': _questions.serialize(),
       };
 
@@ -195,10 +266,19 @@ class AppPreferences with ChangeNotifier {
     _wheelBorderColor =
         Color(map['wheelBorderColor'] ?? Colors.grey[700]!.toARGB32());
     _wheelColorOdd = Color(map['wheelColorOdd'] ?? Colors.blue.toARGB32());
+    _wheelTextColorOdd =
+        Color(map['wheelTextColorOdd'] ?? Colors.black.toARGB32());
     _wheelColorEven =
         Color(map['wheelColorEven'] ?? Colors.blue[800]!.toARGB32());
+    _wheelTextColorEven =
+        Color(map['wheelTextColorEven'] ?? Colors.white.toARGB32());
+    _wheelColorMarker = Color(map['wheelColorMarker'] ?? Colors.red.toARGB32());
     _wheelQuestionColor =
         Color(map['wheelQuestionColor'] ?? Colors.blue.toARGB32());
+    _wheelQuestionTextColor =
+        Color(map['wheelQuestionTextColor'] ?? Colors.white.toARGB32());
+    _wheelQuestionBorderColor =
+        Color(map['wheelQuestionBorderColor'] ?? Colors.grey[700]!.toARGB32());
     _questions = Questions.fromSerialized(map['questions'] ?? {});
   }
 }

@@ -149,10 +149,11 @@ class _WheelScreenState extends State<WheelScreen> {
                     Border.all(color: preferences.wheelBorderColor, width: 20),
               ),
               child: FortuneWheel(
-                indicators: const [
+                indicators: [
                   FortuneIndicator(
                       alignment: Alignment.topCenter,
-                      child: TriangleIndicator(color: Colors.red))
+                      child: TriangleIndicator(
+                          color: preferences.wheelColorMarker)),
                 ],
                 duration: _spinDuration,
                 selected: _selected.stream,
@@ -169,7 +170,9 @@ class _WheelScreenState extends State<WheelScreen> {
                           child: Text(
                             questions.categories[index].name,
                             maxLines: 1,
-                            style: TextStyle(fontSize: wheelSize / 25),
+                            style: TextStyle(
+                                fontSize: wheelSize / 25,
+                                color: preferences.wheelTextColor(index)),
                           ),
                         ))
                     .toList(),
@@ -211,19 +214,28 @@ class _WheelScreenState extends State<WheelScreen> {
               Positioned(
                 bottom: wheelSize / 2,
                 child: Container(
-                  decoration:
-                      BoxDecoration(color: preferences.wheelQuestionColor),
+                  decoration: BoxDecoration(
+                      color: preferences.wheelQuestionBorderColor),
                   width: wheelSize * 6 / 5,
                   height: wheelSize / 5,
                   child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: AutoSizeText(
-                        _currentQuestion!,
-                        maxLines: 2,
-                        style: TextStyle(
-                            color: Colors.white, fontSize: wheelSize / 20),
-                        textAlign: TextAlign.center,
+                    child: Container(
+                      decoration:
+                          BoxDecoration(color: preferences.wheelQuestionColor),
+                      width: wheelSize * 6 / 5 - wheelSize / 30,
+                      height: wheelSize / 5 - wheelSize / 30,
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: AutoSizeText(
+                            _currentQuestion!,
+                            maxLines: 2,
+                            style: TextStyle(
+                                color: preferences.wheelQuestionTextColor,
+                                fontSize: wheelSize / 20),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
                       ),
                     ),
                   ),

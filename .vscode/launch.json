@@ -8,7 +8,7 @@
             "name": "Question wheel",
             "request": "launch",
             "type": "dart",
-            "args": [ "--dart-define=USE_TWITCH_MOCK=false", ]
+            "args": [ "--dart-define=USE_TWITCH_MOCK=true", ]
         },
         {
             "name": "Release Main",
