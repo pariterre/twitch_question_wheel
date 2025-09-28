@@ -24,8 +24,6 @@ class _WheelScreenState extends State<WheelScreen> {
   TwitchAppManager? _twitchManager;
 
   Future<void> _getTwitchManagerDialog() async {
-    debugPrint('Coucou');
-    return;
     _twitchManager = await showTwitchAppAuthenticationDialog(context,
         useMocker: widget.useMock,
         appInfo: TwitchAppInfo(
@@ -74,6 +72,8 @@ class _WheelScreenState extends State<WheelScreen> {
 
   @override
   void dispose() {
+    _twitchManager?.disconnect();
+    _twitchManager = null;
     _selected.close();
     super.dispose();
   }
