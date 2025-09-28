@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twitch_question_wheel/models/file_picker_interface.dart';
 import 'package:twitch_question_wheel/models/questions.dart';
 
-const _preferencesFilename = 'preferences.json';
+const _preferencesFilename = 'wheel_questions.json';
 
 class AppPreferences with ChangeNotifier {
   Color _backgroundColor;
@@ -97,7 +97,7 @@ class AppPreferences with ChangeNotifier {
     await FilePickerInterface.instance.saveFile(
       context,
       data: text,
-      filename: 'preferences.json',
+      filename: _preferencesFilename,
     );
   }
 
