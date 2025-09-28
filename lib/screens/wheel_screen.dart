@@ -23,50 +23,35 @@ class _WheelScreenState extends State<WheelScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   TwitchAppManager? _twitchManager;
 
-  @override
-  void initState() {
-    super.initState();
-
-    if (_twitchManager == null || !_twitchManager!.isConnected) {
-      WidgetsBinding.instance
-          .addPostFrameCallback((_) => _getTwitchManagerDialog());
-    }
-  }
-
   Future<void> _getTwitchManagerDialog() async {
-    _twitchManager = await showDialog<TwitchAppManager?>(
-        barrierDismissible: false,
-        context: context,
-        builder: (context) => TwitchAppAuthenticationDialog(
-              isMockActive: widget.useMock,
-              onConnexionEstablished: (twitchManager) =>
-                  Navigator.of(context).pop(twitchManager),
-              appInfo: TwitchAppInfo(
-                appName: 'QuestionWheel',
-                twitchClientId: 'bobffcezcrakzkqv62h78i04vxkx72',
-                twitchRedirectUri: Uri.https(
-                    'twitchauthentication.pariterre.net',
-                    'twitch_redirect.html'),
-                authenticationServerUri:
-                    Uri.https('twitchserver.pariterre.net:3000', 'token'),
-                scope: [
-                  TwitchAppScope.chatRead,
-                  TwitchAppScope.chatEdit,
-                  TwitchAppScope.chatters,
-                  TwitchAppScope.readFollowers,
-                  TwitchAppScope.readModerator,
-                ],
-              ),
-              debugPanelOptions: TwitchDebugPanelOptions(
-                chatters: [
-                  TwitchChatterMock(displayName: 'Streamer', isModerator: true),
-                  TwitchChatterMock(
-                      displayName: 'Moderator 1', isModerator: true),
-                  TwitchChatterMock(displayName: 'Viewer 1'),
-                ],
-                chatMessages: const ['!spin'],
-              ),
-            ));
+    debugPrint('Coucou');
+    return;
+    _twitchManager = await showTwitchAppAuthenticationDialog(context,
+        useMocker: widget.useMock,
+        appInfo: TwitchAppInfo(
+          appName: 'QuestionWheel',
+          twitchClientId: 'bobffcezcrakzkqv62h78i04vxkx72',
+          twitchRedirectUri: Uri.https(
+              'twitchauthentication.pariterre.net', 'twitch_redirect.html'),
+          authenticationServerUri:
+              Uri.https('twitchserver.pariterre.net:3000', 'token'),
+          scope: [
+            TwitchAppScope.chatRead,
+            TwitchAppScope.chatEdit,
+            TwitchAppScope.chatters,
+            TwitchAppScope.readFollowers,
+            TwitchAppScope.readModerator,
+          ],
+          authenticationFlow: TwitchAuthenticationFlow.implicit,
+        ),
+        debugPanelOptions: TwitchDebugPanelOptions(
+          chatters: [
+            TwitchChatterMock(displayName: 'Streamer', isModerator: true),
+            TwitchChatterMock(displayName: 'Moderator 1', isModerator: true),
+            TwitchChatterMock(displayName: 'Viewer 1'),
+          ],
+          chatMessages: const ['!spin'],
+        ));
     if (!mounted) return;
 
     if (_twitchManager == null) {
@@ -208,6 +193,11 @@ class _WheelScreenState extends State<WheelScreen> {
 
     _twitchManager?.chat.onMessageReceived.listen(
         (sender, message) => _spinIfTwichAsks(sender, message, questions));
+
+    if (_twitchManager == null || !_twitchManager!.isConnected) {
+      WidgetsBinding.instance
+          .addPostFrameCallback((_) => _getTwitchManagerDialog());
+    }
 
     return Scaffold(
       key: _scaffoldKey,
