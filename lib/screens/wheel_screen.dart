@@ -21,9 +21,13 @@ class WheelScreen extends StatefulWidget {
 
 class _WheelScreenState extends State<WheelScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+  bool _isConnecting = false;
   TwitchAppManager? _twitchManager;
 
   Future<void> _getTwitchManagerDialog() async {
+    if (_isConnecting) return;
+    _isConnecting = true;
+
     _twitchManager = await showTwitchAppAuthenticationDialog(context,
         useMocker: widget.useMock,
         appInfo: TwitchAppInfo(
@@ -50,16 +54,21 @@ class _WheelScreenState extends State<WheelScreen> {
           ],
           chatMessages: const ['!spin'],
         ));
-    if (!mounted) return;
+    if (!mounted) {
+      _isConnecting = false;
+      return;
+    }
 
     if (_twitchManager == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text(
               'Connexion à Twitch échouée, veuillez réessayer plus tard.')));
+      _isConnecting = false;
       return;
     }
     _twitchManager!.onHasDisconnected.listen(() => WidgetsBinding.instance
         .addPostFrameCallback((_) => _getTwitchManagerDialog()));
+    _isConnecting = false;
     setState(() {});
   }
 
@@ -197,7 +206,7 @@ class _WheelScreenState extends State<WheelScreen> {
     _twitchManager?.chat.onMessageReceived.listen(
         (sender, message) => _spinIfTwichAsks(sender, message, questions));
 
-    if (_twitchManager == null || !_twitchManager!.isConnected) {
+    if (!_isConnecting && (_twitchManager?.isNotConnected ?? true)) {
       WidgetsBinding.instance
           .addPostFrameCallback((_) => _getTwitchManagerDialog());
     }
